@@ -23,6 +23,7 @@ int	main(int ac, char **av)
 		std::signal(SIGQUIT, signalHandler);
 		// need to start the prog here
 		serv.servInit();
+		serv.test();
 		serv.servLoop();
 	}
 	catch (std::exception &e) {

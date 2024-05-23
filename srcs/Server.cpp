@@ -31,6 +31,43 @@ void Server::addPollFd(const pollfd &fd)
     _vecPollFd.push_back(fd);
 }
 
+void Server::clearClient(int fd) //? Peut etre closes les fds
+{
+    for (size_t i = 0; i < _vecClient.size(); i++)
+    {
+        if (_vecClient[i].getFdClient() == fd)
+        {
+            std::cout << _vecClient[i].getIpAddr() << std::endl;
+            _vecClient.erase(_vecClient.begin() + i);
+            break ;
+        }
+    }
+    for (size_t i = 0; i < _vecPollFd.size(); i++)
+    {
+        if (_vecPollFd[i].fd == fd)
+        {
+            _vecPollFd.erase(_vecPollFd.begin() + i);
+            break ;
+        }
+    }
+}
+
+void Server::closeFds()
+{
+    std::vector<Client>::iterator it;
+
+    for (it = _vecClient.begin(); it != _vecClient.end(); it++)
+    {
+        //? Ecrire un message 
+        close(it->getFdClient());
+    }
+    if (_serverSocketFd != -1)
+    {
+        //? Ecrire un message
+        close(_serverSocketFd);
+    }
+}
+
 void Server::servInit() {
     sockaddr_in data_sock;
     pollfd      newPoll;
@@ -81,11 +118,25 @@ void	Server::servLoop()
 		}
 		for (size_t i = 0; i < _vecPollFd.size(); i++) {
 			if (_vecPollFd[i].revents & POLLIN) { // on verifie si le bit de POLLIN est dans revent, comme ca on check si il y a bien des trucs a lire
-				if (_vecPollFd[i].fd = _serverSocketFd) //regarde si on a le meme file descriptor que celui du socket du serveur
-					// le client est nouveau
-				else
-					// le client existe deja
+				// if (_vecPollFd[i].fd = _serverSocketFd) //regarde si on a le meme file descriptor que celui du socket du serveur
+				// 	// le client est nouveau
+				// else
+				// 	// le client existe deja
 			}
 		}
 	}
+}
+
+void Server::test()
+{
+    Client c1;
+    Client c2;
+    c1.setFdClient(5);
+    c1.setIpAddr("192.3.1.1");
+    c2.setFdClient(8);
+    c2.setIpAddr("192.4.1.1");
+    addClient(c2);
+    addClient(c1);
+    clearClient(c1.getFdClient());
+    clearClient(c2.getFdClient());
 }
