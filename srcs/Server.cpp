@@ -27,3 +27,7 @@ void Server::addPollFd(const pollfd &fd)
 {
     _vecPollFd.push_back(fd);
 }
+
+void Server::servInit() {
+	// need to setup here
+}

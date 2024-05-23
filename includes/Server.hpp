@@ -25,6 +25,7 @@ class Server
     void setServerSocketFd(int fd);
     void addClient(const Client &client);
     void addPollFd(const pollfd &fd);
+	void servInit();
 };
 
 #endif

@@ -20,6 +20,7 @@ int	main(int ac, char **av)
 		std::signal(SIGINT, signalHandler);
 		std::signal(SIGTERM, signalHandler);
 		// need to start the prog here
+		serv.servInit();
 	}
 	catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
