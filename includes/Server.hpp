@@ -30,6 +30,8 @@ class Server
     void addPollFd(const pollfd &fd);
 	void servInit();
 	void servLoop();
+    void clearPollFds();
+    void clearClients();
 };
 
 #endif
