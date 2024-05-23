@@ -32,6 +32,7 @@ class Server
 	void servLoop();
     void clearPollFds();
     void clearClients();
+	void addNewClient();
 };
 
 #endif

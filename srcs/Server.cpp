@@ -1,6 +1,7 @@
 #include "Server.hpp"
 #include <unistd.h>
 #include <fcntl.h>
+#include <arpa/inet.h>
 #include "../includes/lib.hpp"
 
 Server::Server(int port, std::string password) : _port(port), _password(password)
@@ -71,6 +72,31 @@ void Server::servInit() {
     this->addPollFd(newPoll);
 }
 
+void	Server::addNewClient() {
+	Client		newClient;
+	sockaddr_in	infoClient;
+	socklen_t 	lenStructClient = sizeof(infoClient);	// recupere la taille de la struct qui contient les infos de client
+	pollfd		pollClient;
+
+	int fdClient = accept(_serverSocketFd, (sockaddr*)&infoClient, &lenStructClient); //tente de connecter le client au serveur
+	if (fdClient < 0)
+		std::cout << "The server didn't accepted the connection" << std::endl; return ;
+	if (fcntl(fdClient, F_SETFL, SOCK_NONBLOCK) == -1)	// met le socket du client en mode non bloquant
+    {
+        close(fdClient);
+        std::cout << "Error during fcntl call" << std::endl; return ;
+    }
+	pollClient.fd = fdClient;	// remplit la struct poll avant de l'ajouter au vecteur
+	pollClient.events = POLLIN;
+	pollClient.revents = 0;
+
+	newClient.setFdClient(fdClient);
+	newClient.setIpAddr(inet_ntoa(infoClient.sin_addr)); // converti l'adress en binaire au format std::string
+	_vecClient.push_back(newClient);
+	_vecPollFd.push_back(pollClient);
+	std::cout << "new client added" << std::endl;
+}
+
 void	Server::servLoop()
 {
 	while (g_signal == false)
@@ -82,7 +108,7 @@ void	Server::servLoop()
 		for (size_t i = 0; i < _vecPollFd.size(); i++) {
 			if (_vecPollFd[i].revents & POLLIN) { // on verifie si le bit de POLLIN est dans revent, comme ca on check si il y a bien des trucs a lire
 				if (_vecPollFd[i].fd = _serverSocketFd) //regarde si on a le meme file descriptor que celui du socket du serveur
-					// le client est nouveau
+					addNewClient();
 				else
 					// le client existe deja
 			}
