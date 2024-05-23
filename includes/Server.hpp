@@ -33,6 +33,10 @@ class Server
     void closeFds();
     void clearClient(int fd);
     void test();
+    void clearPollFds();
+    void clearClients();
+	void addNewClient();
+	void readReceivedData(int fd);
 };
 
 #endif
