@@ -4,6 +4,8 @@
 #include "../includes/lib.hpp"
 #include "../includes/Server.hpp"
 
+bool g_signal = false;
+
 int	main(int ac, char **av)
 {
 	if (ac != 3)
@@ -18,9 +20,10 @@ int	main(int ac, char **av)
 	std::cout << "Server started\n";
 	try {
 		std::signal(SIGINT, signalHandler);
-		std::signal(SIGTERM, signalHandler);
+		std::signal(SIGQUIT, signalHandler);
 		// need to start the prog here
 		serv.servInit();
+		serv.servLoop();
 	}
 	catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;

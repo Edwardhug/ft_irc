@@ -28,6 +28,7 @@ class Server
     void addClient(const Client &client);
     void addPollFd(const pollfd &fd);
 	void servInit();
+	void servLoop();
 };
 
 #endif

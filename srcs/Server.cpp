@@ -1,6 +1,7 @@
 #include "Server.hpp"
 #include <unistd.h>
 #include <fcntl.h>
+#include "../includes/lib.hpp"
 
 Server::Server(int port, std::string password) : _port(port), _password(password)
 {
@@ -68,4 +69,12 @@ void Server::servInit() {
     newPoll.revents = 0;
 
     this->addPollFd(newPoll);
+}
+
+void	Server::servLoop()
+{
+	while (g_signal == false)
+	{
+		
+	}
 }
