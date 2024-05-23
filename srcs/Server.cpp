@@ -143,9 +143,9 @@ void	Server::readReceivedData(int fd)
 	ssize_t bytes_received;
 
 	for (int i = 0; i < BUFFER_SIZE; i++) {
-
+		buffer[i] = 0;
 	}
-	bytes_received = recv(fd, buffer, BUFFER_SIZE, 0);
+	bytes_received = recv(fd, buffer, BUFFER_SIZE, 0); //  put the received data in the buffer
 	if (bytes_received == -1) {
 		std::cout << "error during recv call" << std::endl;
 		return ;
