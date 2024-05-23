@@ -3,9 +3,13 @@ CC = c++
 CFLAG = -Wall -Wextra -Werror -std=c++98
 
 SRCS =	main.cpp \
-		signal.cpp 
+		signal.cpp \
+		Client.cpp \
+		Server.cpp 
 
-INCLUDE =	lib.hpp 
+INCLUDE =	lib.hpp \
+			Client.hpp \
+			Server.hpp 
 OBJS = $(SRCS:%.cpp=$(PATH_OBJS)%.o)
 
 PATH_SRCS = srcs/
