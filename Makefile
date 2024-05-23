@@ -5,7 +5,8 @@ CFLAG = -Wall -Wextra -Werror -std=c++98
 SRCS =	main.cpp \
 		signal.cpp \
 		Client.cpp \
-		Server.cpp 
+		Server.cpp \
+		utils.cpp 
 
 INCLUDE =	lib.hpp \
 			Client.hpp \

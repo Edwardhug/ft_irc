@@ -7,20 +7,20 @@ Client::~Client() {}
 
 void Client::setFdClient(int fd)
 {
-    fdClient = fd;
+    _fdClient = fd;
 }
 
 void Client::setIpAddr(const std::string &ipAddr)
 {
-    this->ipAddrClient = ipAddr;
+    this->_ipAddrClient = ipAddr;
 }
 
 int Client::getFdClient()
 {
-    return (this->fdClient);
+    return (this->_fdClient);
 }
 
 std::string Client::getIpAddr()
 {
-    return (this->ipAddrClient);
+    return (this->_ipAddrClient);
 }

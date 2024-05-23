@@ -5,8 +5,8 @@
 class Client
 {
     private:
-    int fdClient;
-    std::string ipAddrClient;
+    int _fdClient;
+    std::string _ipAddrClient;
 
     public:
     Client();

@@ -8,14 +8,16 @@
 class Server 
 {
     private:
-    int port;
-    int serverSocketFd;
-    static bool signal;
-    std::vector<Client> vecClient;
-    std::vector<pollfd> vecPollFd; 
+    int _port;
+	std::string _password;
+    int _serverSocketFd;
+    static bool _signal;
+    std::vector<Client> _vecClient;
+    std::vector<pollfd> _vecPollFd;
+
 
     public:
-    Server();
+    Server(int port, std::string password);
     ~Server();
     // Server(const Server &s);
     // Server& operator=(const Server &s);
