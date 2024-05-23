@@ -1,49 +1,36 @@
-#===========================VARIABLE===============================#
-SRCS			:=	main.cpp \
-					PmergeMe.cpp\
-					PmergeMeVec.cpp\
-					PmergeMeList.cpp\
+NAME = ircsrev
+CC = c++
+CFLAG = -Wall -Wextra -Werror -std=c++98
 
-OBJS_D			:=	objs/
+SRCS =	main.cpp \
+		signal.cpp 
 
-OBJS			:=	$(SRCS:%.cpp=$(OBJS_D)%.o)
+INCLUDE =	lib.hpp 
+OBJS = $(SRCS:%.cpp=$(PATH_OBJS)%.o)
 
-HEAD_D			:=	incs/
+PATH_SRCS = srcs/
+PATH_INCLUDE = includes/
+PATH_OBJS = objs/
 
-HEAD			:=	PmergeMe.hpp\
+all: $(NAME)
 
-HEAD_A			:=	$(addprefix $(HEAD_D), $(HEAD))
+$(NAME): $(PATH_OBJS) $(OBJS) $(addprefix $(PATH_INCLUDE), $(INCLUDE))
+	$(CC) $(CFLAG) $(OBJS) -o $(NAME)
 
-NAME			:=	PmergeMe
+$(OBJS): $(PATH_OBJS)%.o: $(PATH_SRCS)%.cpp $(addprefix $(PATH_INCLUDE), $(INCLUDE))
+	$(CC) $(CFLAG) -I$(PATH_INCLUDE) -c $< -o $@
 
-#=========================FLAG===============================#
-CC				:=	c++ -std=c++98
+$(PATH_OBJS):
+	mkdir -p $(PATH_OBJS)
 
-RM				:=	rm -rf
+clean:
+	rm -rf $(OBJS) $(PATH_OBJS)
 
-CFLAGS			:=	-Wall -Wextra -Werror
+fclean: clean
+	rm -rf $(NAME)
 
-#ASAN_F			:=	-g3 -fsanitize=address
+re: fclean all
 
-ASAN_F			:= -g3
-#========================EXEC===============================#
-all				:	$(NAME)
+FORCE:
 
-$(NAME)			:	$(OBJS_D) $(OBJS)
-				$(CC) $(CFLAGS) $(ASAN_F) -o $(NAME) $(OBJS)
-
-$(OBJS)			:	$(OBJS_D)%.o: $(SRCS_D)%.cpp $(HEAD_A)
-				$(CC) $(CFLAGS) $(ASAN_F) -I$(HEAD_D) -c $< -o $@
-
-$(OBJS_D)		:
-				mkdir -p $(OBJS_D)
-
-clean			:
-				$(RM) $(OBJS) $(OBJS_D)
-
-fclean			:	clean
-				$(RM) $(NAME)
-
-re				:	fclean all
-
-.PHONY			:	all clean fclean re FORCE
+.PHONY: all re bonus clean fclean
