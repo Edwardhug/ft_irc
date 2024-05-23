@@ -6,6 +6,7 @@
 #include "Client.hpp"
 #include <netinet/in.h>
 #include <exception>
+#include <iostream>
 
 class Server 
 {
@@ -15,7 +16,7 @@ class Server
     int _serverSocketFd;
     static bool _signal;
     std::vector<Client> _vecClient;
-    std::vector<pollfd> _vecPollFd;
+    std::vector<pollfd> _vecPollFd;	// peut etre besoin de mettre <struct pollfd>
 
 
     public:

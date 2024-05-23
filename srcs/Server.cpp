@@ -75,6 +75,17 @@ void	Server::servLoop()
 {
 	while (g_signal == false)
 	{
-		
+		if (poll(&_vecPollFd[0], _vecPollFd.size(), -1) == -1) { //va bloquer jusqu'a recevoir une donnee
+			std::cout << "poll error" << std::endl;
+			throw std::exception();
+		}
+		for (int i = 0; i < _vecPollFd.size(); i++) {
+			if (_vecPollFd[i].revents & POLLIN) { // on verifie si le bit de POLLIN est dans revent, comme ca on check si il y a bien des trucs a lire
+				if (_vecPollFd[i].fd = _serverSocketFd) //regarde si on a le meme file descriptor que celui du socket du serveur
+					// le client est nouveau
+				else
+					// le client existe deja
+			}
+		}
 	}
 }
