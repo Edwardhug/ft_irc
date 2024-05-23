@@ -126,17 +126,3 @@ void	Server::servLoop()
 		}
 	}
 }
-
-void Server::test()
-{
-    Client c1;
-    Client c2;
-    c1.setFdClient(5);
-    c1.setIpAddr("192.3.1.1");
-    c2.setFdClient(8);
-    c2.setIpAddr("192.4.1.1");
-    addClient(c2);
-    addClient(c1);
-    clearClient(c1.getFdClient());
-    clearClient(c2.getFdClient());
-}
