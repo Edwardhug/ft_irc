@@ -79,8 +79,11 @@ void	Server::addNewClient() {
 	pollfd		pollClient;
 
 	int fdClient = accept(_serverSocketFd, (sockaddr*)&infoClient, &lenStructClient); //tente de connecter le client au serveur
-	if (fdClient < 0)
-		std::cout << "The server didn't accepted the connection" << std::endl; return ;
+	if (fdClient < 0) {
+		std::cout << "The server didn't accepted the connection" << std::endl;
+		return ;
+
+	}
 	if (fcntl(fdClient, F_SETFL, SOCK_NONBLOCK) == -1)	// met le socket du client en mode non bloquant
     {
         close(fdClient);
@@ -97,20 +100,41 @@ void	Server::addNewClient() {
 	std::cout << "new client added" << std::endl;
 }
 
+void	Server::readReceivedData(int fd)
+{
+	char *buffer[BUFFER_SIZE];
+	ssize_t bytes_received;
+
+	for (int i = 0; i < BUFFER_SIZE; i++) {
+
+	}
+	bytes_received = recv(fd, buffer, BUFFER_SIZE, 0);
+	if (bytes_received == -1) {
+		std::cout << "error during recv call" << std::endl;
+		return ;
+	}
+	else if (bytes_received == 0) {
+		std::cout << "Client disconnected" << std::endl;
+		// faut peut etre faire quelque chose mais je sais pas quoi
+	}
+	else
+		std::cout << "Client " << fd << " said : " << buffer << std::endl;
+}
+
 void	Server::servLoop()
 {
 	while (g_signal == false)
 	{
-		if (poll(&_vecPollFd[0], _vecPollFd.size(), -1) == -1) { //va bloquer jusqu'a recevoir une donnee
+		if (poll(&_vecPollFd[0], _vecPollFd.size(), -1) == -1 && g_signal == false) { //va bloquer jusqu'a recevoir une donnee
 			std::cout << "poll error" << std::endl;
 			throw std::exception();
 		}
 		for (size_t i = 0; i < _vecPollFd.size(); i++) {
 			if (_vecPollFd[i].revents & POLLIN) { // on verifie si le bit de POLLIN est dans revent, comme ca on check si il y a bien des trucs a lire
-				if (_vecPollFd[i].fd = _serverSocketFd) //regarde si on a le meme file descriptor que celui du socket du serveur
+				if (_vecPollFd[i].fd == _serverSocketFd) //regarde si on a le meme file descriptor que celui du socket du serveur
 					addNewClient();
 				else
-					// le client existe deja
+					readReceivedData(_vecPollFd[i].fd);
 			}
 		}
 	}

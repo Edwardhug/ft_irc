@@ -1,6 +1,8 @@
 #ifndef LIB_HPP
 # define LIB_HPP
 
+	# define BUFFER_SIZE 1024
+
 	extern bool g_signal;
 
 
