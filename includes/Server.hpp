@@ -4,6 +4,8 @@
 #include <vector>
 #include <poll.h>
 #include "Client.hpp"
+#include <netinet/in.h>
+#include <exception>
 
 class Server 
 {
