@@ -6,7 +6,7 @@ SRCS =	main.cpp \
 		signal.cpp \
 		Client.cpp \
 		Server.cpp \
-		utils.cpp 
+		utils.cpp \
 
 INCLUDE =	lib.hpp \
 			Client.hpp \

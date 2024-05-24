@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <exception>
 #include <iostream>
+#include <sys/socket.h>
 
 class Server 
 {
@@ -38,6 +39,10 @@ class Server
 	void addNewClient();
 	void readReceivedData(int fd);
 	void removeClient(int fd);
+    void operatorCanals(char *buffer);
+    void msg(std::vector<std::string> datas);
+    bool attributeNickName(int fd, char *buffer);
+    int findFdWithNick(std::string &nick);
 };
 
 #endif

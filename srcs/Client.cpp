@@ -24,3 +24,13 @@ std::string Client::getIpAddr()
 {
     return (this->_ipAddrClient);
 }
+
+void Client::setNick(std::string nick)
+{
+    this->_nick = nick;
+}
+
+std::string Client::getNick()
+{
+    return (this->_nick);
+}

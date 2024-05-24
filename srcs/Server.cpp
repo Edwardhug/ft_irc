@@ -137,11 +137,49 @@ void	Server::addNewClient() {
 	std::cout << "new client added" << std::endl;
 }
 
+bool    Server::attributeNickName(int fd, char *buffer)
+{
+    std::string find;
+    size_t nickPos;
+    size_t endLinePos;
+    find = static_cast<std::string>(buffer);
+    if (find.find("NICK") != std::string::npos)
+    {
+        for (size_t i = 0; i < _vecClient.size(); i++)
+        {
+            if (_vecClient[i].getFdClient() == fd)
+            {
+                nickPos = find.find("NICK");
+                nickPos += 5;
+                endLinePos = find.find('\n', nickPos);
+                if (endLinePos == std::string::npos)
+                    endLinePos = find.length();
+                _vecClient[i].setNick(find.substr(nickPos, endLinePos - nickPos - 1));
+                std::cout << "The nick is : " << _vecClient[i].getNick() << std::endl;
+                break;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+int     Server::findFdWithNick(std::string &nick)
+{
+    for (size_t i = 0; i < _vecClient.size(); i++)
+    {
+        if (_vecClient[i].getNick() == nick)
+        {
+            return _vecClient[i].getFdClient();
+        }
+    }
+    return (-1);
+}
+
 void	Server::readReceivedData(int fd)
 {
 	char buffer[BUFFER_SIZE];
 	ssize_t bytes_received;
-
  	// for (int i = 0; i < BUFFER_SIZE; i++) {
 	// 	buffer[i] = 0;
 	// }
@@ -159,7 +197,40 @@ void	Server::readReceivedData(int fd)
 	else {
 		buffer[bytes_received] = '\0';
 		std::cout << "Client " << fd << " said : " << buffer << std::endl;
+        if (attributeNickName(fd, buffer))
+            return;
+        operatorCanals(buffer);
 	}
+}
+
+void    Server::msg(std::vector<std::string> datas)
+{
+    int fd;
+    ssize_t bytesSend;
+    fd = findFdWithNick(datas[1]);
+    std::cout << datas[2] << " " << fd << std::endl;
+    bytesSend = send(fd, datas[2].c_str(), datas[2].length(), 0);// peut etre changer les flags
+    if (bytesSend == -1)
+    {
+        throw std::exception();
+    }
+    std::cout << "bytesSend : " << bytesSend << std::endl;
+}
+
+void    Server::operatorCanals(char *buffer)
+{
+    std::vector<std::string> datas;
+    std::string buff;
+
+    buff = static_cast<std::string>(buffer);
+    if (buff.find("PRIVMSG") != std::string::npos)
+    {
+        datas = split(buff, ' ');
+        if (datas.size() < 3)
+            throw std::exception();
+        datas[2] = datas[2].substr(1, datas[2].length()); // enleve le ctrlM et \n a la fin de la ligne
+        msg(datas);
+    }
 }
 
 void	Server::servLoop()

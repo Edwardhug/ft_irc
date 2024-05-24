@@ -7,6 +7,7 @@ class Client
     private:
     int _fdClient;
     std::string _ipAddrClient;
+    std::string _nick;
 
     public:
     Client();
@@ -17,6 +18,8 @@ class Client
     void setIpAddr(const std::string &ipAddr);
     int getFdClient();
     std::string getIpAddr();
+    void setNick(std::string nick);
+    std::string getNick();
 };
 
 #endif
