@@ -137,9 +137,29 @@ void	Server::addNewClient() {
 	std::cout << "new client added" << std::endl;
 }
 
+// faudra regarder cette fonction et la refaire, remove client
+
+void Server::removeClient(int fd) {
+    // Retirer le client de _vecClient
+    for (std::vector<Client>::iterator it = _vecClient.begin(); it != _vecClient.end(); ++it) {
+        if (it->getFdClient() == fd) {
+            _vecClient.erase(it);
+            break;
+        }
+    }
+
+    // Retirer le descripteur de fichier de _vecPollFd
+    for (std::vector<pollfd>::iterator it = _vecPollFd.begin(); it != _vecPollFd.end(); ++it) {
+        if (it->fd == fd) {
+            _vecPollFd.erase(it);
+            break;
+        }
+    }
+}
+
 void	Server::readReceivedData(int fd)
 {
-	char *buffer[BUFFER_SIZE];
+	char buffer[BUFFER_SIZE];
 	ssize_t bytes_received;
 
 	// for (int i = 0; i < BUFFER_SIZE; i++) {
@@ -153,11 +173,13 @@ void	Server::readReceivedData(int fd)
 	else if (bytes_received == 0) {
 		std::cout << "Client " << fd << " disconnected" << std::endl;
 		// faut peut etre faire quelque chose mais je sais pas quoi
-		// removeClient(fd);
+		removeClient(fd);
 		close(fd);
 	}
-	else
+	else {
+		buffer[bytes_received] = '\0';
 		std::cout << "Client " << fd << " said : " << buffer << std::endl;
+	}
 }
 
 void	Server::servLoop()

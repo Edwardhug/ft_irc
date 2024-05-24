@@ -37,6 +37,7 @@ class Server
     void clearClients();
 	void addNewClient();
 	void readReceivedData(int fd);
+	void removeClient(int fd);
 };
 
 #endif
