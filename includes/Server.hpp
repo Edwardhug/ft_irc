@@ -39,10 +39,11 @@ class Server
 	void addNewClient();
 	void readReceivedData(int fd);
 	void removeClient(int fd);
-    void operatorCanals(char *buffer);
-    void msg(std::vector<std::string> datas);
+    void operatorCanals(char *buffer, int fdSender);
+    void sendmsg(const std::string &from, const std::string &to, const std::string& message);
     bool attributeNickName(int fd, char *buffer);
-    int findFdWithNick(std::string &nick);
+    int findFdWithNick(const std::string &nick);
+    std::string findNickWithFd(int fd);
 };
 
 #endif

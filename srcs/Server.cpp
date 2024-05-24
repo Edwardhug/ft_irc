@@ -164,7 +164,7 @@ bool    Server::attributeNickName(int fd, char *buffer)
     return false;
 }
 
-int     Server::findFdWithNick(std::string &nick)
+int     Server::findFdWithNick(const std::string &nick)
 {
     for (size_t i = 0; i < _vecClient.size(); i++)
     {
@@ -174,6 +174,18 @@ int     Server::findFdWithNick(std::string &nick)
         }
     }
     return (-1);
+}
+
+std::string Server::findNickWithFd(int fd)
+{
+    for (size_t i = 0; i < _vecClient.size(); i++)
+    {
+        if (_vecClient[i].getFdClient() == fd)
+        {
+            return _vecClient[i].getNick();
+        }
+    }
+    return "";
 }
 
 void	Server::readReceivedData(int fd)
@@ -199,37 +211,49 @@ void	Server::readReceivedData(int fd)
 		std::cout << "Client " << fd << " said : " << buffer << std::endl;
         if (attributeNickName(fd, buffer))
             return;
-        operatorCanals(buffer);
+        operatorCanals(buffer, fd);
 	}
 }
 
-void    Server::msg(std::vector<std::string> datas)
+void    Server::sendmsg(const std::string &from, const std::string &to, const std::string& message) // il n'affiche pas qui a envoyer le message
 {
-    int fd;
+    int fd = findFdWithNick(to);
+    if (fd == -1)
+    {
+        throw std::exception(); // afficher fd non trouver
+    }
+    std::string completeMessage = ":" + from + " PRIVMSG " + to + " :" + message + "\r\n";
+    std::cout << "msg : " << completeMessage << std::endl;
     ssize_t bytesSend;
-    fd = findFdWithNick(datas[1]);
-    std::cout << datas[2] << " " << fd << std::endl;
-    bytesSend = send(fd, datas[2].c_str(), datas[2].length(), 0);// peut etre changer les flags
+    bytesSend = send(fd, completeMessage.c_str(), completeMessage.length(), 0);// peut etre changer les flags
     if (bytesSend == -1)
     {
-        throw std::exception();
+        throw std::exception(); // afficher erreur envoie des donnees
     }
     std::cout << "bytesSend : " << bytesSend << std::endl;
 }
 
-void    Server::operatorCanals(char *buffer)
+void    Server::operatorCanals(char *buffer, int fdSender)
 {
-    std::vector<std::string> datas;
-    std::string buff;
+    std::vector<std::string> data;
+    std::string buff = static_cast<std::string>(buffer);;
 
-    buff = static_cast<std::string>(buffer);
     if (buff.find("PRIVMSG") != std::string::npos)
     {
-        datas = split(buff, ' ');
-        if (datas.size() < 3)
-            throw std::exception();
-        datas[2] = datas[2].substr(1, datas[2].length()); // enleve le ctrlM et \n a la fin de la ligne
-        msg(datas);
+        data = split(buff, ' ');
+        if (data.size() >= 3)
+        {
+            std::string to = data[1];
+            std::string message = data[2];
+            std::string from = findNickWithFd(fdSender);
+            if (from.empty())
+                throw std::exception(); // pas sur qu'elle existe mais rajouter envoyer non trouver
+            if (!message.empty() && message[0] == ':')
+            {
+                message.erase(0, 1);
+            }
+            sendmsg(from, to, buff);
+        }
     }
 }
 

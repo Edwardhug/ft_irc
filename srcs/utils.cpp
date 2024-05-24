@@ -7,8 +7,13 @@ std::vector<std::string> split(std::string& str, char delimiter) {
 
     while (std::getline(tokenStream, token, delimiter)) {
         tokens.push_back(token);
+        if (tokens.size() == 3) { // quand la taille est a 3, ca veut dire qu'on a des espaces dans le message
+            std::string remaining;
+            std::getline(tokenStream, remaining);
+            tokens[2] += delimiter + remaining;
+            break;
+        }
     }
-
     return tokens;
 }
 
