@@ -142,17 +142,19 @@ void	Server::readReceivedData(int fd)
 	char *buffer[BUFFER_SIZE];
 	ssize_t bytes_received;
 
-	for (int i = 0; i < BUFFER_SIZE; i++) {
-		buffer[i] = 0;
-	}
+	// for (int i = 0; i < BUFFER_SIZE; i++) {
+	// 	buffer[i] = 0;
+	// }
 	bytes_received = recv(fd, buffer, BUFFER_SIZE, 0); //  put the received data in the buffer
 	if (bytes_received == -1) {
 		std::cout << "error during recv call" << std::endl;
 		return ;
 	}
 	else if (bytes_received == 0) {
-		std::cout << "Client disconnected" << std::endl;
+		std::cout << "Client " << fd << " disconnected" << std::endl;
 		// faut peut etre faire quelque chose mais je sais pas quoi
+		// removeClient(fd);
+		close(fd);
 	}
 	else
 		std::cout << "Client " << fd << " said : " << buffer << std::endl;
