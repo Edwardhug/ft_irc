@@ -223,7 +223,6 @@ void    Server::sendmsg(const std::string &from, const std::string &to, const st
         throw std::exception(); // afficher fd non trouver
     }
     std::string completeMessage = ":" + from + " PRIVMSG " + to + " :" + message + "\r\n";
-    std::cout << "msg : " << completeMessage << std::endl;
     ssize_t bytesSend;
     bytesSend = send(fd, completeMessage.c_str(), completeMessage.length(), 0);// peut etre changer les flags
     if (bytesSend == -1)
@@ -252,7 +251,7 @@ void    Server::operatorCanals(char *buffer, int fdSender)
             {
                 message.erase(0, 1);
             }
-            sendmsg(from, to, buff);
+            sendmsg(from, to, message);
         }
     }
 }
