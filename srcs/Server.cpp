@@ -220,6 +220,25 @@ void	Server::readReceivedData(int fd)
         operatorCanals(buffer, fd);
 	}
 }
+//==================NICK===========================
+void    Server::defineNick(std::string buff, int fdSender)
+{
+    std::vector<std::string> data;
+    data = split(buff, ' ');
+    std::cout << data.size() << std::endl;
+    if (!data[1].empty())
+    {
+        for (size_t i = 0; i < _vecClient.size(); i++)
+        {
+            if (_vecClient[i].getFdClient() == fdSender)
+            {
+                _vecClient[i].setNick(data[1]);
+            }
+        }
+    }
+}
+//================================================
+
 //===================PRIVMSG========================
 void    Server::sendmsg(const std::string &from, const std::string &to, const std::string& message) // il n'affiche pas qui a envoyer le message
 {
@@ -227,7 +246,7 @@ void    Server::sendmsg(const std::string &from, const std::string &to, const st
     if (fd == -1)
     {
         std::cout << "Not find the fd of the receiver" << std::endl;
-        throw std::exception(); // afficher fd non trouver
+        throw std::exception();
     }
     std::string completeMessage = ":" + from + " PRIVMSG " + to + " :" + message + "\r\n";
     ssize_t bytesSend;
@@ -235,7 +254,7 @@ void    Server::sendmsg(const std::string &from, const std::string &to, const st
     if (bytesSend == -1)
     {
         std::cout << "Error when send data for a PRIVMSG" << std::endl;
-        throw std::exception(); // afficher erreur envoie des donnees
+        throw std::exception(); 
     }
     std::cout << "bytesSend : " << bytesSend << std::endl;
 }
@@ -262,6 +281,7 @@ void    Server::splitForPrivMsg(std::string buff, int fdSender)
     }
 }
 //====================================================
+
 //=======================MODE=========================
 void    Server::splitForMode(std::string buff, int fdSender)
 {
@@ -281,7 +301,6 @@ void    Server::splitForMode(std::string buff, int fdSender)
         std::string message = ":" + from + " MODE " + channel + " " + modes + "\r\n";
     }
 }
-
 //====================================================
 void    Server::operatorCanals(char *buffer, int fdSender) // A transformer en switch case ?
 {
@@ -294,6 +313,10 @@ void    Server::operatorCanals(char *buffer, int fdSender) // A transformer en s
     if (buff.find("MODE") != std::string::npos)
     {
         splitForMode(buff, fdSender);
+    }
+    if (buff.find("NICK") != std::string::npos)
+    {
+        defineNick(buff, fdSender);
     }
 }
 

@@ -46,6 +46,7 @@ class Server
     std::string findNickWithFd(int fd);
     void splitForPrivMsg(std::string buff, int fdSender);
     void splitForMode(std::string buff, int fdSender);
+    void defineNick(std::string buff, int fdSender);
 };
 
 #endif
