@@ -44,6 +44,8 @@ class Server
     bool attributeNickName(int fd, char *buffer);
     int findFdWithNick(const std::string &nick);
     std::string findNickWithFd(int fd);
+    void splitForPrivMsg(std::string buff, int fdSender);
+    void splitForMode(std::string buff, int fdSender);
 };
 
 #endif

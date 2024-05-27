@@ -8,3 +8,8 @@ Channel::Channel(std::string name, Client *creator)
 }
 
 Channel::~Channel() {}
+
+void Channel::changeMode(char addOrDel, std::string modes)
+{
+
+}

@@ -71,7 +71,7 @@ void Server::closeFds()
 
 void Server::servInit() {
     sockaddr_in data_sock;
-    pollfd      newPoll;
+    pollfd newPoll;
 
     data_sock.sin_family = AF_INET; // IPV4
     data_sock.sin_port = htons(this->_port);
@@ -79,25 +79,32 @@ void Server::servInit() {
 
     this->_serverSocketFd = socket(AF_INET, SOCK_STREAM, 0);
     if (this->_serverSocketFd == -1)
+    {
+        std::cout << "Error: socket function as failed for server socket" << std::endl;
         throw std::exception();
+    }
     int biz = 1;
     if (setsockopt(this->_serverSocketFd, SOL_SOCKET, SO_REUSEADDR, &biz, sizeof(biz)) == -1) // On definit le socket pour pouvoir reutilliser l'addresse
     {
+        std::cout << "Error: setsockopt as failed for server socket" << std::endl;
         close(_serverSocketFd);
         throw std::exception();
     }
     if (fcntl(_serverSocketFd, F_SETFL, SOCK_NONBLOCK) == -1) // Le socket ne block plus lors d'une tache 
     {
+        std::cout << "Error: fcntl as failed for server socket" << std::endl;
         close(_serverSocketFd);
         throw std::exception();
     }
     if (bind(_serverSocketFd, (struct sockaddr *)&data_sock, sizeof(data_sock)) == -1) //  On bind le socket avec le port et l'addresse 
     {
+        std::cout << "Error: bind as failed for server socket" << std::endl;
         close(_serverSocketFd);
         throw std::exception();
     }
     if (listen(_serverSocketFd, SOMAXCONN) == -1) // Le socket accepte les nouvelles connections et max 1024
     {
+        std::cout << "Error: listen as failed to listen on server socket" << std::endl;
         close(_serverSocketFd);
         throw std::exception();
     }
@@ -119,7 +126,6 @@ void	Server::addNewClient() {
 	if (fdClient < 0) {
 		std::cout << "The server didn't accepted the connection" << std::endl;
 		return ;
-
 	}
 	if (fcntl(fdClient, F_SETFL, SOCK_NONBLOCK) == -1)	// met le socket du client en mode non bloquant
     {
@@ -214,12 +220,13 @@ void	Server::readReceivedData(int fd)
         operatorCanals(buffer, fd);
 	}
 }
-
+//===================PRIVMSG========================
 void    Server::sendmsg(const std::string &from, const std::string &to, const std::string& message) // il n'affiche pas qui a envoyer le message
 {
     int fd = findFdWithNick(to);
     if (fd == -1)
     {
+        std::cout << "Not find the fd of the receiver" << std::endl;
         throw std::exception(); // afficher fd non trouver
     }
     std::string completeMessage = ":" + from + " PRIVMSG " + to + " :" + message + "\r\n";
@@ -227,32 +234,66 @@ void    Server::sendmsg(const std::string &from, const std::string &to, const st
     bytesSend = send(fd, completeMessage.c_str(), completeMessage.length(), 0);// peut etre changer les flags
     if (bytesSend == -1)
     {
+        std::cout << "Error when send data for a PRIVMSG" << std::endl;
         throw std::exception(); // afficher erreur envoie des donnees
     }
     std::cout << "bytesSend : " << bytesSend << std::endl;
 }
 
-void    Server::operatorCanals(char *buffer, int fdSender)
+void    Server::splitForPrivMsg(std::string buff, int fdSender)
 {
     std::vector<std::string> data;
-    std::string buff = static_cast<std::string>(buffer);;
+    data = split(buff, ' ');
+    if (data.size() >= 3)
+    {
+        std::string to = data[1];
+        std::string message = data[2];
+        std::string from = findNickWithFd(fdSender);
+        if (from.empty())
+        {
+            std::cout << "Error: sender nickname not found";
+            throw std::exception(); // pas sur qu'elle existe mais rajouter envoyer non trouver
+        }
+        if (!message.empty() && message[0] == ':')
+        {
+            message.erase(0, 1);
+        }
+        sendmsg(from, to, message);
+    }
+}
+//====================================================
+//=======================MODE=========================
+void    Server::splitForMode(std::string buff, int fdSender)
+{
+    std::vector<std::string> data;
+    data = split(buff, ' ');
+    (void)fdSender;
+    if (data.size() >= 3)
+    {
+        std::string channel = data[1];
+        std::string modes = data[2];
+        std::string from = findNickWithFd(fdSender);
+        std::cout << "channel :" <<  channel << "modes : " << modes << std::endl;
+        if (modes.find('-') == std::string::npos && modes.find('+') == std::string::npos)
+        {
+            std::cerr << "Add - or + before the channel operator";
+        }
+        std::string message = ":" + from + " MODE " + channel + " " + modes + "\r\n";
+    }
+}
+
+//====================================================
+void    Server::operatorCanals(char *buffer, int fdSender) // A transformer en switch case ?
+{
+    std::string buff = static_cast<std::string>(buffer);
 
     if (buff.find("PRIVMSG") != std::string::npos)
     {
-        data = split(buff, ' ');
-        if (data.size() >= 3)
-        {
-            std::string to = data[1];
-            std::string message = data[2];
-            std::string from = findNickWithFd(fdSender);
-            if (from.empty())
-                throw std::exception(); // pas sur qu'elle existe mais rajouter envoyer non trouver
-            if (!message.empty() && message[0] == ':')
-            {
-                message.erase(0, 1);
-            }
-            sendmsg(from, to, message);
-        }
+        splitForPrivMsg(buff, fdSender);
+    }
+    if (buff.find("MODE") != std::string::npos)
+    {
+        splitForMode(buff, fdSender);
     }
 }
 
