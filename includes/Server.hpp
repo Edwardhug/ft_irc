@@ -46,8 +46,8 @@ class Server
     bool attributeNickName(int fd, char *buffer);
     void splitForPrivMsg(std::string buff, int fdSender);
     void splitForMode(std::string buff, int fdSender);
-    Client findClientWithNick(const std::string &nick);
-    Client findClientWithFd(int fd);
+    Client& findClientWithNick(const std::string &nick);
+    Client& findClientWithFd(int fd);
 };
 
 #endif

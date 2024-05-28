@@ -160,7 +160,10 @@ bool    Server::attributeNickName(int fd, char *buffer)
                 endLinePos = find.find('\n', nickPos);
                 if (endLinePos == std::string::npos)
                     endLinePos = find.length();
-                _vecClient[i].setNick(find.substr(nickPos, endLinePos - nickPos - 1));
+                std::string newNick = find.substr(nickPos, endLinePos - nickPos);
+                if (newNick.find(13) != std::string::npos)
+                    newNick = newNick.substr(0, newNick.size() - 1);
+                _vecClient[i].setNick(newNick);
                 std::cout << "The nick is : " << _vecClient[i].getNick() << std::endl;
                 break;
             }
@@ -170,7 +173,7 @@ bool    Server::attributeNickName(int fd, char *buffer)
     return false;
 }
 
-Client	Server::findClientWithNick(const std::string &nick)
+Client&	Server::findClientWithNick(const std::string &nick)
 {
 	size_t i;
     for (i = 0; i < _vecClient.size(); i++)
@@ -180,10 +183,10 @@ Client	Server::findClientWithNick(const std::string &nick)
             return _vecClient[i];
         }
     }
-	return _vecClient[i];
+	throw std::runtime_error("Client not found with the nick");
 }
 
-Client Server::findClientWithFd(int fd)
+Client& Server::findClientWithFd(int fd)
 {
 	size_t i;
     for (i = 0; i < _vecClient.size(); i++)
@@ -193,7 +196,7 @@ Client Server::findClientWithFd(int fd)
             return _vecClient[i];
         }
     }
-	return _vecClient[i];
+	throw std::runtime_error("Client not found with the fd");
 }
 
 void	Server::readReceivedData(int fd)
@@ -222,14 +225,18 @@ void	Server::readReceivedData(int fd)
         operatorCanals(buffer, fd);
 	}
 }
+
 //===================PRIVMSG========================
 void    Server::sendmsg(const std::string &from, const std::string &to, const std::string& message) // il n'affiche pas qui a envoyer le message
 {
-    int fd = findClientWithNick(to).getFdClient();
-    if (fd == -1)
+    int fd;
+    try {
+        fd = findClientWithNick(to).getFdClient();
+    }
+    catch (const std::runtime_error& e)
     {
-        std::cout << "Not find the fd of the receiver" << std::endl;
-        throw std::exception(); // afficher fd non trouver
+        std::cerr << e.what() << std::endl;
+        throw std::exception(); // A changer
     }
     std::string completeMessage = ":" + from + " PRIVMSG " + to + " :" + message + "\r\n";
     ssize_t bytesSend;
@@ -250,11 +257,14 @@ void    Server::splitForPrivMsg(std::string buff, int fdSender)
     {
         std::string to = data[1];
         std::string message = data[2];
-        std::string from = findClientWithFd(fdSender).getNick();
-        if (from.empty())
+        std::string from;
+        try {
+            from = findClientWithFd(fdSender).getNick();
+        }
+        catch (std::runtime_error& e)
         {
-            std::cout << "Error: sender nickname not found";
-            throw std::exception(); // pas sur qu'elle existe mais rajouter envoyer non trouver
+            std::cerr << e.what() << std::endl;
+            throw std::exception(); //A changer
         }
         if (!message.empty() && message[0] == ':')
         {
@@ -274,7 +284,15 @@ void    Server::splitForMode(std::string buff, int fdSender)
     {
         std::string channel = data[1];
         std::string modes = data[2];
-        std::string from = findClientWithFd(fdSender).getNick();
+        std::string from;
+        try {
+            from = findClientWithFd(fdSender).getNick();
+        }
+        catch (std::runtime_error& e)
+        {
+            std::cerr << e.what() << std::endl;
+            throw std::exception(); // A changer
+        }
         std::cout << "channel :" <<  channel << "modes : " << modes << std::endl;
         if (modes.find('-') == std::string::npos && modes.find('+') == std::string::npos)
         {

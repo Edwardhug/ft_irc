@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "Client.hpp"
+
 class Channel {
     private:
     std::string _name;
