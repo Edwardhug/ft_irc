@@ -50,6 +50,10 @@ class Server
 	void splitForJoin(std::string buff, int fdSender);
     Client& findClientWithNick(const std::string &nick);
     Client& findClientWithFd(int fd);
+	bool	channelExist(std::string name);
+	void addClientToChannel(std::string nameChannel, Client &client);
+	Channel &findChannelWithName(std::string name);
+	void	channelMsg(char *buffer, int fdSender);
 };
 
 #endif

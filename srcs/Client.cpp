@@ -1,7 +1,8 @@
 #include "Client.hpp"
 
-Client::Client()
-{}
+Client::Client() {
+	_inChannel = false;
+}
 
 Client::~Client() {}
 
@@ -33,4 +34,23 @@ void Client::setNick(std::string nick)
 std::string Client::getNick()
 {
     return (this->_nick);
+}
+
+bool	Client::getInChannel() {
+	return (_inChannel);
+}
+
+void	Client::changeChannelBool() {
+	if (_inChannel == true)
+		_inChannel = false;
+	else if (_inChannel == false)
+		_inChannel = true;
+}
+
+void	Client::setChannel(Channel *channel) {
+	_activeChannel = channel;
+}
+
+Channel &Client::getActiveChannel() {
+	return *_activeChannel;
 }

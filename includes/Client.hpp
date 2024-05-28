@@ -2,12 +2,18 @@
 #define CLIENT_HPP
 
 #include <string>
+#include "Channel.hpp"
+
+class Channel;
+
 class Client
 {
     private:
     int _fdClient;
     std::string _ipAddrClient;
     std::string _nick;
+	bool		_inChannel;
+	Channel		*_activeChannel;
 
     public:
     Client();
@@ -20,6 +26,10 @@ class Client
     std::string getIpAddr();
     void setNick(std::string nick);
     std::string getNick();
+	bool	getInChannel();
+	void	changeChannelBool();
+	void	setChannel(Channel *channel);
+	Channel &getActiveChannel();
 };
 
 #endif

@@ -1,5 +1,7 @@
 #include "../includes/Channel.hpp"
 
+Channel::Channel() {}
+
 Channel::Channel(std::string name, Client *creator)
 {
     this->_name = name;
@@ -20,5 +22,9 @@ void	Channel::addClient(Client *newClient) {
 
 std::string	Channel::getName() {
 	return (_name);
+}
+
+std::vector<Client*> Channel::getVecClient() {
+	return (_clients);
 }
 
