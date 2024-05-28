@@ -3,11 +3,12 @@
 
 #include <vector>
 #include <poll.h>
-#include "Client.hpp"
 #include <netinet/in.h>
 #include <exception>
 #include <iostream>
 #include <sys/socket.h>
+#include "Client.hpp"
+#include "Channel.hpp"
 
 class Server 
 {
@@ -18,6 +19,7 @@ class Server
     static bool _signal;
     std::vector<Client> _vecClient;
     std::vector<pollfd> _vecPollFd;	// peut etre besoin de mettre <struct pollfd>
+	std::vector<Channel> _vecChannel;
 
 
     public:
@@ -42,10 +44,10 @@ class Server
     void operatorCanals(char *buffer, int fdSender);
     void sendmsg(const std::string &from, const std::string &to, const std::string& message);
     bool attributeNickName(int fd, char *buffer);
-    int findFdWithNick(const std::string &nick);
-    std::string findNickWithFd(int fd);
     void splitForPrivMsg(std::string buff, int fdSender);
     void splitForMode(std::string buff, int fdSender);
+    Client findClientWithNick(const std::string &nick);
+    Client findClientWithFd(int fd);
 };
 
 #endif

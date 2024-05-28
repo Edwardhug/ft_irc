@@ -11,5 +11,10 @@ Channel::~Channel() {}
 
 void Channel::changeMode(char addOrDel, std::string modes)
 {
-
+	(void)addOrDel;
+	(void)modes;
 }
+void	Channel::addClient(Client *newClient) {
+	_clients.push_back(newClient);
+}
+

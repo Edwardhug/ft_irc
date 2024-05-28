@@ -170,29 +170,33 @@ bool    Server::attributeNickName(int fd, char *buffer)
     return false;
 }
 
-int     Server::findFdWithNick(const std::string &nick)
+Client	Server::findClientWithNick(const std::string &nick)
 {
-    for (size_t i = 0; i < _vecClient.size(); i++)
+	size_t i;
+    for (i = 0; i < _vecClient.size(); i++)
     {
         if (_vecClient[i].getNick() == nick)
         {
-            return _vecClient[i].getFdClient();
+            return _vecClient[i];
         }
     }
-    return (-1);
+	return _vecClient[i];
 }
 
-std::string Server::findNickWithFd(int fd)
+Client Server::findClientWithFd(int fd)
 {
-    for (size_t i = 0; i < _vecClient.size(); i++)
+	size_t i;
+    for (i = 0; i < _vecClient.size(); i++)
     {
         if (_vecClient[i].getFdClient() == fd)
         {
-            return _vecClient[i].getNick();
+            return _vecClient[i];
         }
     }
-    return "";
+	return _vecClient[i];
 }
+
+// Client	Server::
 
 void	Server::readReceivedData(int fd)
 {
@@ -223,7 +227,7 @@ void	Server::readReceivedData(int fd)
 //===================PRIVMSG========================
 void    Server::sendmsg(const std::string &from, const std::string &to, const std::string& message) // il n'affiche pas qui a envoyer le message
 {
-    int fd = findFdWithNick(to);
+    int fd = findClientWithNick(to).getFdClient();
     if (fd == -1)
     {
         std::cout << "Not find the fd of the receiver" << std::endl;
@@ -248,7 +252,7 @@ void    Server::splitForPrivMsg(std::string buff, int fdSender)
     {
         std::string to = data[1];
         std::string message = data[2];
-        std::string from = findNickWithFd(fdSender);
+        std::string from = findClientWithFd(fdSender).getNick();
         if (from.empty())
         {
             std::cout << "Error: sender nickname not found";
@@ -272,7 +276,7 @@ void    Server::splitForMode(std::string buff, int fdSender)
     {
         std::string channel = data[1];
         std::string modes = data[2];
-        std::string from = findNickWithFd(fdSender);
+        std::string from = findClientWithFd(fdSender).getNick();
         std::cout << "channel :" <<  channel << "modes : " << modes << std::endl;
         if (modes.find('-') == std::string::npos && modes.find('+') == std::string::npos)
         {
@@ -295,6 +299,14 @@ void    Server::operatorCanals(char *buffer, int fdSender) // A transformer en s
     {
         splitForMode(buff, fdSender);
     }
+	// else if (buff.find("JOIN"))
+	// {
+	// 	data = split(buff, ' ');
+    //     if (data.size() >= 2)
+    //     {
+	// 		Channel	newChannel(data[2], )
+	// 	}
+	// }
 }
 
 void	Server::servLoop()
