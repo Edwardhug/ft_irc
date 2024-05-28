@@ -8,3 +8,8 @@ Channel::Channel(std::string name, Client *creator)
 }
 
 Channel::~Channel() {}
+
+void	Channel::addClient(Client *newClient) {
+	_clients.push_back(newClient);
+}
+

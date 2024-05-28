@@ -14,6 +14,7 @@ class Channel {
     public:
     Channel(std::string name, Client* creator);
     ~Channel();
+	void	addClient(Client *newClient);
 };
 
 #endif
