@@ -301,6 +301,7 @@ bool	Server::channelExist(std::string name) {
             return true;
         }
     }
+	std::cout << "YOOOO" << std::endl;
 	return false;
 }
 
@@ -313,6 +314,7 @@ void Server::addClientToChannel(std::string nameChannel, Client &client) {
 			return ;
 		}
     }
+
 }
 
 Channel &Server::findChannelWithName(std::string name) {
@@ -331,19 +333,19 @@ void	Server::splitForJoin(std::string buff, int fdSender)
 	std::vector<std::string> data;
 	Client &client = findClientWithFd(fdSender);
     data = split(buff, ' ');
-	if (data.size() >= 2 && channelExist(data[2]) == false)
+	if (data.size() >= 2 && channelExist(data[1]) == false)
     {
-		Channel newChannel(data[2], &client);
+		Channel newChannel(data[1], &client);
 		addChannel(newChannel);
 		std::cout << "Channel " << newChannel.getName() << " created succesfully and "  << findClientWithFd(fdSender).getNick() << " is operator" << std::endl;
 		client.changeChannelBool();
-		client.setChannel(&findChannelWithName(data[2]));
+		client.setChannel(&findChannelWithName(data[1]));
 	}
-	else if (data.size() >= 2 && channelExist(data[2]) == true) {
-		addClientToChannel(data[2], client);
+	else if (data.size() >= 2 && channelExist(data[1]) == true) {
+		addClientToChannel(data[1], client);
 		std::cout << "Add client " << client.getNick() << " to the channel";
 		client.changeChannelBool();
-		client.setChannel(&findChannelWithName(data[2]));
+		client.setChannel(&findChannelWithName(data[1]));
 	}
 }
 //==============================channel msg=============================
