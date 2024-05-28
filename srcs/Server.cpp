@@ -160,7 +160,7 @@ bool    Server::attributeNickName(int fd, char *buffer)
                 endLinePos = find.find('\n', nickPos);
                 if (endLinePos == std::string::npos)
                     endLinePos = find.length();
-                _vecClient[i].setNick(find.substr(nickPos, endLinePos - nickPos));
+                _vecClient[i].setNick(find.substr(nickPos, endLinePos - nickPos - 1));
                 std::cout << "The nick is : " << _vecClient[i].getNick() << std::endl;
                 break;
             }
@@ -170,29 +170,30 @@ bool    Server::attributeNickName(int fd, char *buffer)
     return false;
 }
 
-int     Server::findFdWithNick(const std::string &nick)
+Client	Server::findClientWithNick(const std::string &nick)
 {
-    for (size_t i = 0; i < _vecClient.size(); i++)
+	size_t i;
+    for (i = 0; i < _vecClient.size(); i++)
     {
-        std::cout << "nick : " << nick << " clientNick : " << _vecClient[i].getNick() << std::endl;
         if (_vecClient[i].getNick() == nick)
         {
-            return _vecClient[i].getFdClient();
+            return _vecClient[i];
         }
     }
-    return (-1);
+	return _vecClient[i];
 }
 
-std::string Server::findNickWithFd(int fd)
+Client Server::findClientWithFd(int fd)
 {
-    for (size_t i = 0; i < _vecClient.size(); i++)
+	size_t i;
+    for (i = 0; i < _vecClient.size(); i++)
     {
         if (_vecClient[i].getFdClient() == fd)
         {
-            return _vecClient[i].getNick();
+            return _vecClient[i];
         }
     }
-    return "";
+	return _vecClient[i];
 }
 
 void	Server::readReceivedData(int fd)
@@ -221,16 +222,14 @@ void	Server::readReceivedData(int fd)
         operatorCanals(buffer, fd);
 	}
 }
-
 //===================PRIVMSG========================
 void    Server::sendmsg(const std::string &from, const std::string &to, const std::string& message) // il n'affiche pas qui a envoyer le message
 {
-    std::cout << "to : " << to << std::endl;
-    int fd = findFdWithNick(to);
+    int fd = findClientWithNick(to).getFdClient();
     if (fd == -1)
     {
         std::cout << "Not find the fd of the receiver" << std::endl;
-        throw std::exception();
+        throw std::exception(); // afficher fd non trouver
     }
     std::string completeMessage = ":" + from + " PRIVMSG " + to + " :" + message + "\r\n";
     ssize_t bytesSend;
@@ -238,7 +237,7 @@ void    Server::sendmsg(const std::string &from, const std::string &to, const st
     if (bytesSend == -1)
     {
         std::cout << "Error when send data for a PRIVMSG" << std::endl;
-        throw std::exception(); 
+        throw std::exception(); // afficher erreur envoie des donnees
     }
     std::cout << "bytesSend : " << bytesSend << std::endl;
 }
@@ -251,7 +250,7 @@ void    Server::splitForPrivMsg(std::string buff, int fdSender)
     {
         std::string to = data[1];
         std::string message = data[2];
-        std::string from = findNickWithFd(fdSender);
+        std::string from = findClientWithFd(fdSender).getNick();
         if (from.empty())
         {
             std::cout << "Error: sender nickname not found";
@@ -265,7 +264,6 @@ void    Server::splitForPrivMsg(std::string buff, int fdSender)
     }
 }
 //====================================================
-
 //=======================MODE=========================
 void    Server::splitForMode(std::string buff, int fdSender)
 {
@@ -276,7 +274,7 @@ void    Server::splitForMode(std::string buff, int fdSender)
     {
         std::string channel = data[1];
         std::string modes = data[2];
-        std::string from = findNickWithFd(fdSender);
+        std::string from = findClientWithFd(fdSender).getNick();
         std::cout << "channel :" <<  channel << "modes : " << modes << std::endl;
         if (modes.find('-') == std::string::npos && modes.find('+') == std::string::npos)
         {
@@ -285,6 +283,7 @@ void    Server::splitForMode(std::string buff, int fdSender)
         std::string message = ":" + from + " MODE " + channel + " " + modes + "\r\n";
     }
 }
+
 //====================================================
 void    Server::operatorCanals(char *buffer, int fdSender) // A transformer en switch case ?
 {

@@ -7,10 +7,12 @@ SRCS =	main.cpp \
 		Client.cpp \
 		Server.cpp \
 		utils.cpp \
+		Channel.cpp 
 
 INCLUDE =	lib.hpp \
 			Client.hpp \
-			Server.hpp 
+			Server.hpp \
+			Channel.hpp 
 OBJS = $(SRCS:%.cpp=$(PATH_OBJS)%.o)
 
 PATH_SRCS = srcs/

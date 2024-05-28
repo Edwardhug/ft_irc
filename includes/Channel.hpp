@@ -15,6 +15,7 @@ class Channel {
     Channel(std::string name, Client* creator);
     ~Channel();
     void changeMode(char addOrDel, std::string modes);
+	void	addClient(Client *newClient);
 };
 
 #endif
