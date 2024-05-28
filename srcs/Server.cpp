@@ -32,6 +32,10 @@ void Server::addPollFd(const pollfd &fd)
     _vecPollFd.push_back(fd);
 }
 
+void Server::addChannel(const Channel &channel) {
+	_vecChannel.push_back(channel);
+}
+
 void Server::clearClient(int fd) //? Peut etre closes les fds
 {
     for (size_t i = 0; i < _vecClient.size(); i++)
@@ -170,7 +174,7 @@ bool    Server::attributeNickName(int fd, char *buffer)
     return false;
 }
 
-Client	Server::findClientWithNick(const std::string &nick)
+Client&	Server::findClientWithNick(const std::string &nick)
 {
 	size_t i;
     for (i = 0; i < _vecClient.size(); i++)
@@ -183,7 +187,7 @@ Client	Server::findClientWithNick(const std::string &nick)
 	return _vecClient[i];
 }
 
-Client Server::findClientWithFd(int fd)
+Client& Server::findClientWithFd(int fd)
 {
 	size_t i;
     for (i = 0; i < _vecClient.size(); i++)
@@ -286,6 +290,21 @@ void    Server::splitForMode(std::string buff, int fdSender)
     }
 }
 
+//=====================JOIN============================
+
+void	Server::splitForJoin(std::string buff, int fdSender)
+{
+	std::vector<std::string> data;
+	Client &client = findClientWithFd(fdSender);
+    data = split(buff, ' ');
+	if (data.size() >= 2)
+    {
+		Channel newChannel(data[2], &client);
+		addChannel(newChannel);
+		std::cout << "Channel " << newChannel.getName() << " created succesfully and "  << findClientWithFd(fdSender).getNick() << " is operator" << std::endl;
+	}
+}
+
 //====================================================
 void    Server::operatorCanals(char *buffer, int fdSender) // A transformer en switch case ?
 {
@@ -295,10 +314,14 @@ void    Server::operatorCanals(char *buffer, int fdSender) // A transformer en s
     {
         splitForPrivMsg(buff, fdSender);
     }
-    if (buff.find("MODE") != std::string::npos)
+    else if (buff.find("MODE") != std::string::npos)
     {
         splitForMode(buff, fdSender);
     }
+	else if (buff.find("JOIN") != std::string::npos){
+		splitForJoin(buff, fdSender);
+	}
+
 	// else if (buff.find("JOIN"))
 	// {
 	// 	data = split(buff, ' ');

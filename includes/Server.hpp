@@ -31,6 +31,7 @@ class Server
     void setServerSocketFd(int fd);
     void addClient(const Client &client);
     void addPollFd(const pollfd &fd);
+	void addChannel(const Channel &channel);
 	void servInit();
 	void servLoop();
     void closeFds();
@@ -46,8 +47,9 @@ class Server
     bool attributeNickName(int fd, char *buffer);
     void splitForPrivMsg(std::string buff, int fdSender);
     void splitForMode(std::string buff, int fdSender);
-    Client findClientWithNick(const std::string &nick);
-    Client findClientWithFd(int fd);
+	void splitForJoin(std::string buff, int fdSender);
+    Client& findClientWithNick(const std::string &nick);
+    Client& findClientWithFd(int fd);
 };
 
 #endif

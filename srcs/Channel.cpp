@@ -18,3 +18,7 @@ void	Channel::addClient(Client *newClient) {
 	_clients.push_back(newClient);
 }
 
+std::string	Channel::getName() {
+	return (_name);
+}
+
