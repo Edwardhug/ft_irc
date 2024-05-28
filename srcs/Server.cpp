@@ -160,7 +160,7 @@ bool    Server::attributeNickName(int fd, char *buffer)
                 endLinePos = find.find('\n', nickPos);
                 if (endLinePos == std::string::npos)
                     endLinePos = find.length();
-                _vecClient[i].setNick(find.substr(nickPos, endLinePos - nickPos - 1));
+                _vecClient[i].setNick(find.substr(nickPos, endLinePos - nickPos));
                 std::cout << "The nick is : " << _vecClient[i].getNick() << std::endl;
                 break;
             }
@@ -174,6 +174,7 @@ int     Server::findFdWithNick(const std::string &nick)
 {
     for (size_t i = 0; i < _vecClient.size(); i++)
     {
+        std::cout << "nick : " << nick << " clientNick : " << _vecClient[i].getNick() << std::endl;
         if (_vecClient[i].getNick() == nick)
         {
             return _vecClient[i].getFdClient();
@@ -220,28 +221,11 @@ void	Server::readReceivedData(int fd)
         operatorCanals(buffer, fd);
 	}
 }
-//==================NICK===========================
-void    Server::defineNick(std::string buff, int fdSender)
-{
-    std::vector<std::string> data;
-    data = split(buff, ' ');
-    std::cout << data.size() << std::endl;
-    if (!data[1].empty())
-    {
-        for (size_t i = 0; i < _vecClient.size(); i++)
-        {
-            if (_vecClient[i].getFdClient() == fdSender)
-            {
-                _vecClient[i].setNick(data[1]);
-            }
-        }
-    }
-}
-//================================================
 
 //===================PRIVMSG========================
 void    Server::sendmsg(const std::string &from, const std::string &to, const std::string& message) // il n'affiche pas qui a envoyer le message
 {
+    std::cout << "to : " << to << std::endl;
     int fd = findFdWithNick(to);
     if (fd == -1)
     {
@@ -313,10 +297,6 @@ void    Server::operatorCanals(char *buffer, int fdSender) // A transformer en s
     if (buff.find("MODE") != std::string::npos)
     {
         splitForMode(buff, fdSender);
-    }
-    if (buff.find("NICK") != std::string::npos)
-    {
-        defineNick(buff, fdSender);
     }
 }
 
