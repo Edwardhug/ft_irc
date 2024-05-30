@@ -69,6 +69,11 @@ void Server::closeFds()
     }
 }
 
+void Server::servSendMessageToClient(const std::string &message, Client &client)
+{
+    send(client.getFdClient(), message.c_str(), message.length(), 0);
+}
+
 void Server::servInit() {
     sockaddr_in data_sock;
     pollfd newPoll;
@@ -206,6 +211,7 @@ void	Server::readReceivedData(int fd)
  	// for (int i = 0; i < BUFFER_SIZE; i++) {
 	// 	buffer[i] = 0;
 	// }
+    std::cout << "BUFFER RECEIVE : " << buffer << "\n";
 	bytes_received = recv(fd, buffer, BUFFER_SIZE, 0); //  put the received data in the buffer
 	if (bytes_received == -1) {
 		std::cout << "error during recv call" << std::endl;
@@ -222,9 +228,43 @@ void	Server::readReceivedData(int fd)
 		std::cout << "Client " << fd << " said : " << buffer << std::endl;
         if (attributeNickName(fd, buffer))
             return;
+
         operatorCanals(buffer, fd);
 	}
 }
+//===================PASS===========================
+void    Server::checkPass(const std::string &buff, int fdClient)
+{
+    (void)fdClient;
+    std::string rightPass = this->_password;
+    size_t passWord = buff.find("PASS ");
+    if (passWord == std::string::npos)
+    {
+        std::cout << "Error with command PASS, no \'PASS\'";
+        return;
+    }
+    size_t passEnd = buff.find('\n', passWord);
+    if (passEnd == std::string::npos)
+    {
+        std::cout << "Error with command PASS, no \'\\n\'";
+        return;
+    }
+    std::string passIn = buff.substr(passWord + 5, passEnd - passWord - 5);
+    if (!passIn.empty() && passIn[passIn.size() - 1] == '\r')
+    {
+        passIn.erase(passIn.size() - 1);
+    }
+    if (passIn != rightPass)
+    {
+        Client c = findClientWithFd(fdClient);
+//        servSendMessageToClient("You enter a wrong password", c);
+//        servSendMessageToClient("You will be disconnected", c);
+//        servSendMessageToClient("QUIT :Leaving\r\n", c);
+        close(fdClient);
+        clearClient(fdClient);
+    }
+}
+//==================================================
 
 //===================PRIVMSG========================
 void    Server::sendmsg(const std::string &from, const std::string &to, const std::string& message) // il n'affiche pas qui a envoyer le message
@@ -249,7 +289,7 @@ void    Server::sendmsg(const std::string &from, const std::string &to, const st
     std::cout << "bytesSend : " << bytesSend << std::endl;
 }
 
-void    Server::splitForPrivMsg(std::string buff, int fdSender)
+void    Server::splitForPrivMsg(const std::string &buff, int fdSender)
 {
     std::vector<std::string> data;
     data = split(buff, ' ');
@@ -275,7 +315,7 @@ void    Server::splitForPrivMsg(std::string buff, int fdSender)
 }
 //====================================================
 //=======================MODE=========================
-void    Server::splitForMode(std::string buff, int fdSender)
+void    Server::splitForMode(const std::string &buff, int fdSender)
 {
     std::vector<std::string> data;
     data = split(buff, ' ');

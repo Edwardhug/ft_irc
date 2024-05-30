@@ -44,10 +44,12 @@ class Server
     void operatorCanals(char *buffer, int fdSender);
     void sendmsg(const std::string &from, const std::string &to, const std::string& message);
     bool attributeNickName(int fd, char *buffer);
-    void splitForPrivMsg(std::string buff, int fdSender);
-    void splitForMode(std::string buff, int fdSender);
+    void splitForPrivMsg(const std::string &buff, int fdSender);
+    void splitForMode(const std::string& buff, int fdSender);
     Client& findClientWithNick(const std::string &nick);
     Client& findClientWithFd(int fd);
+    void checkPass(const std::string &buff, int fdClient);
+    void servSendMessageToClient(const std::string &message, Client& client);
 };
 
 #endif
