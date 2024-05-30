@@ -54,6 +54,7 @@ class Server
 	void addClientToChannel(std::string nameChannel, Client &client);
 	Channel &findChannelWithName(std::string name);
 	void	channelMsg(char *buffer, int fdSender);
+	void	sendConfirmation(std::vector<std::string> data, Client &client);
 };
 
 #endif

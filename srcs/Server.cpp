@@ -165,7 +165,7 @@ bool    Server::attributeNickName(int fd, char *buffer)
                 if (endLinePos == std::string::npos)
                     endLinePos = find.length();
                 _vecClient[i].setNick(find.substr(nickPos, endLinePos - nickPos - 1));
-                std::cout << "The nick is : " << _vecClient[i].getNick() << std::endl;
+                // std::cout << "The nick is : " << _vecClient[i].getNick() << std::endl;
                 break;
             }
         }
@@ -222,7 +222,7 @@ void	Server::readReceivedData(int fd)
 	}
 	else {
 		buffer[bytes_received] = '\0';
-		std::cout << "Client " << fd << " said : " << buffer << std::endl;
+		// std::cout << "Client " << fd << " said : " << buffer << std::endl;
         if (attributeNickName(fd, buffer))
             return;
         operatorCanals(buffer, fd);
@@ -245,7 +245,7 @@ void    Server::sendmsg(const std::string &from, const std::string &to, const st
         std::cout << "Error when send data for a PRIVMSG" << std::endl;
         throw std::exception(); // afficher erreur envoie des donnees
     }
-    std::cout << "bytesSend : " << bytesSend << std::endl;
+    // std::cout << "bytesSend : " << bytesSend << std::endl;
 }
 
 void    Server::splitForPrivMsg(std::string buff, int fdSender)
@@ -290,85 +290,11 @@ void    Server::splitForMode(std::string buff, int fdSender)
     }
 }
 
-//=====================JOIN============================
-
-bool	Server::channelExist(std::string name) {
-	size_t i;
-    for (i = 0; i < _vecChannel.size(); i++)
-    {
-        if (_vecChannel[i].getName() == name)
-        {
-            return true;
-        }
-    }
-	std::cout << "YOOOO" << std::endl;
-	return false;
-}
-
-void Server::addClientToChannel(std::string nameChannel, Client &client) {
-	size_t i;
-    for (i = 0; i < _vecChannel.size(); i++)
-    {
-        if (_vecChannel[i].getName() == nameChannel) {
-			_vecChannel[i].addClient(&client);
-			return ;
-		}
-    }
-
-}
-
-Channel &Server::findChannelWithName(std::string name) {
-	size_t i;
-    for (i = 0; i < _vecChannel.size(); i++)
-    {
-        if (_vecChannel[i].getName() == name) {
-			return _vecChannel[i];
-		}
-    }
-	return _vecChannel[i]; // arrive jamais ici parce qu'on fait les check avant
-}
-
-void	Server::splitForJoin(std::string buff, int fdSender)
-{
-	std::vector<std::string> data;
-	Client &client = findClientWithFd(fdSender);
-    data = split(buff, ' ');
-	if (data.size() >= 2 && channelExist(data[1]) == false)
-    {
-		Channel newChannel(data[1], &client);
-		addChannel(newChannel);
-		std::cout << "Channel " << newChannel.getName() << " created succesfully and "  << findClientWithFd(fdSender).getNick() << " is operator" << std::endl;
-		client.changeChannelBool();
-		client.setChannel(&findChannelWithName(data[1]));
-	}
-	else if (data.size() >= 2 && channelExist(data[1]) == true) {
-		addClientToChannel(data[1], client);
-		std::cout << "Add client " << client.getNick() << " to the channel";
-		client.changeChannelBool();
-		client.setChannel(&findChannelWithName(data[1]));
-	}
-}
-//==============================channel msg=============================
-
-void	Server::channelMsg(char *buffer, int fdSender) {
-	Client senderClient = findClientWithFd(fdSender);
-	Channel channel = senderClient.getActiveChannel();
-	std::string	from = senderClient.getNick() + " from " + channel.getName();
-	std::vector<Client*> vecClient = channel.getVecClient();
-
-	// besoin de faire la commande /part et /quit pour quitter le channel
-	size_t i;
-    for (i = 0; i < vecClient.size(); i++)
-    {
-        if (vecClient[i]->getNick() != senderClient.getNick())
-			sendmsg(from, vecClient[i]->getNick(), buffer);
-    }	
-}
-
 //====================================================
 void    Server::operatorCanals(char *buffer, int fdSender) // A transformer en switch case ?
 {
     std::string buff = static_cast<std::string>(buffer);
+	std::cout << "received message :" << buff << std::endl;
 
 	if (findClientWithFd(fdSender).getInChannel() == true)
 		channelMsg(buffer, fdSender);
