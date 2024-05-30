@@ -28,8 +28,8 @@ class Client
     std::string getNick();
 	bool	getInChannel();
 	void	changeChannelBool();
-	void	setChannel(Channel *channel);
-	Channel &getActiveChannel();
+	void	setChannel(Channel &channel);
+	Channel getActiveChannel();
 };
 
 #endif

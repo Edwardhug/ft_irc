@@ -47,10 +47,10 @@ void	Client::changeChannelBool() {
 		_inChannel = true;
 }
 
-void	Client::setChannel(Channel *channel) {
-	_activeChannel = channel;
+void	Client::setChannel(Channel &channel) {
+	_activeChannel = &channel;
 }
 
-Channel &Client::getActiveChannel() {
+Channel Client::getActiveChannel() {
 	return *_activeChannel;
 }

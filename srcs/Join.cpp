@@ -67,13 +67,13 @@ void	Server::splitForJoin(std::string buff, int fdSender)
 		Channel newChannel(data[1], &client);
 		addChannel(newChannel);
 		client.changeChannelBool();
-		client.setChannel(&findChannelWithName(data[1]));
+		client.setChannel(findChannelWithName(data[1]));
 		sendConfirmation(data, client);
 	}
 	else if (data.size() >= 2 && channelExist(data[1]) == true) {
 		addClientToChannel(data[1], client);
 		client.changeChannelBool();
-		client.setChannel(&findChannelWithName(data[1]));
+		client.setChannel(findChannelWithName(data[1]));
 		sendConfirmation(data, client);
 	}
 }
@@ -91,22 +91,13 @@ char *getMessage(char *buffer) {
 void Server::channelMsg(char *buffer, int fdSender) {
     Client &senderClient = findClientWithFd(fdSender);
 	char *message = getMessage(buffer);
-    
-    // Récupérer le canal actif du client
-
-    Channel &channel = senderClient.getActiveChannel();
+    Channel channel = senderClient.getActiveChannel();
     std::string channelName = channel.getName();
+	channelName.resize(channelName.size() - 1);
 
-    // Construire le message à envoyer
+	std::cout << "channelName: " << channelName << "fin du channelName"  <<std::endl;
 	std::string fullMessage = ":" + senderClient.getNick() + "!" + senderClient.getNick() + "@server PRIVMSG " + channelName + " :" + message + "\r\n";
-
-    // Déboguer le message complet
-    std::cout << "Full message: " << fullMessage << std::endl;
-
-    // Récupérer tous les clients du canal
     std::vector<Client*> vecClient = channel.getVecClient();
-
-    // Envoyer le message à tous les membres du canal sauf l'expéditeur
     for (size_t i = 0; i < vecClient.size(); ++i) {
         int clientFd = vecClient[i]->getFdClient();
         if (clientFd != fdSender) {
