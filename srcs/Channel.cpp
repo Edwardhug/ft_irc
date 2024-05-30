@@ -1,5 +1,8 @@
 #include "../includes/Channel.hpp"
 #include <iostream>
+
+Channel::Channel() {}
+
 Channel::Channel(std::string name, Client *creator)
 {
     this->_name = name;
@@ -49,5 +52,10 @@ void Channel::changeMode(char addOrDel, char mode, Client& from)
 }
 void	Channel::addClient(Client *newClient) {
 	_clients.push_back(newClient);
+}
+
+
+std::vector<Client*> Channel::getVecClient() {
+	return (_clients);
 }
 

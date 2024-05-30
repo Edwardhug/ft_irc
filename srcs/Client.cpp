@@ -1,7 +1,9 @@
 #include "Client.hpp"
 
 Client::Client() : _fdClient(-1), _corrPass(false)
-{}
+{
+	_inChannel = false;
+}
 
 Client::~Client() {}
 
@@ -43,4 +45,23 @@ bool Client::getPass() const
 void Client::setPass()
 {
     this->_corrPass = true;
+}
+
+bool	Client::getInChannel() {
+	return (_inChannel);
+}
+
+void	Client::changeChannelBool() {
+	if (_inChannel == true)
+		_inChannel = false;
+	else if (_inChannel == false)
+		_inChannel = true;
+}
+
+void	Client::setChannel(Channel &channel) {
+	_activeChannel = &channel;
+}
+
+Channel Client::getActiveChannel() {
+	return *_activeChannel;
 }
