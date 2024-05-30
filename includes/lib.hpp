@@ -12,5 +12,6 @@
 	void	signalHandler(int signum);
 	int		ft_atoi(const char* str);
     std::vector<std::string> split(const std::string &buffer, char delimiter);
+    std::vector<std::string> splitBuffer(const std::string &buffer, char delimiter);
 
 #endif

@@ -8,6 +8,7 @@ class Client
     int _fdClient;
     std::string _ipAddrClient;
     std::string _nick;
+    bool _corrPass;
 
     public:
     Client();
@@ -16,10 +17,12 @@ class Client
     // Client &operator=(const Client &c);
     void setFdClient(int fd);
     void setIpAddr(const std::string &ipAddr);
-    int getFdClient();
-    std::string getIpAddr();
+    int getFdClient() const;
+    std::string getIpAddr() const;
     void setNick(std::string nick);
-    std::string getNick();
+    std::string getNick() const;
+    bool getPass() const;
+    void setPass();
 };
 
 #endif

@@ -74,6 +74,11 @@ void Server::servSendMessageToClient(const std::string &message, Client &client)
     send(client.getFdClient(), message.c_str(), message.length(), 0);
 }
 
+void Server::errorPassword(Client& client)
+{
+    servSendMessageToClient(":server 464 " + client.getNick() + " :Password incorrect\r\n", client);
+}
+
 void Server::servInit() {
     sockaddr_in data_sock;
     pollfd newPoll;
@@ -148,36 +153,6 @@ void	Server::addNewClient() {
 	std::cout << "new client added" << std::endl;
 }
 
-bool    Server::attributeNickName(int fd, char *buffer)
-{
-    std::string find;
-    size_t nickPos;
-    size_t endLinePos;
-    find = static_cast<std::string>(buffer);
-    if (find.find("NICK") != std::string::npos)
-    {
-        for (size_t i = 0; i < _vecClient.size(); i++)
-        {
-            if (_vecClient[i].getFdClient() == fd)
-            {
-                nickPos = find.find("NICK");
-                nickPos += 5;
-                endLinePos = find.find('\n', nickPos);
-                if (endLinePos == std::string::npos)
-                    endLinePos = find.length();
-                std::string newNick = find.substr(nickPos, endLinePos - nickPos);
-                if (newNick.find(13) != std::string::npos)
-                    newNick = newNick.substr(0, newNick.size() - 1);
-                _vecClient[i].setNick(newNick);
-                std::cout << "The nick is : " << _vecClient[i].getNick() << std::endl;
-                break;
-            }
-        }
-        return true;
-    }
-    return false;
-}
-
 Client&	Server::findClientWithNick(const std::string &nick)
 {
 	size_t i;
@@ -206,13 +181,14 @@ Client& Server::findClientWithFd(int fd)
 
 void	Server::readReceivedData(int fd)
 {
+    static std::string completeBuffer;
 	char buffer[BUFFER_SIZE];
 	ssize_t bytes_received;
  	// for (int i = 0; i < BUFFER_SIZE; i++) {
 	// 	buffer[i] = 0;
 	// }
-    std::cout << "BUFFER RECEIVE : " << buffer << "\n";
 	bytes_received = recv(fd, buffer, BUFFER_SIZE, 0); //  put the received data in the buffer
+    std::cout << "BUFFER RECEIVE : " << buffer << "!end!\n";
 	if (bytes_received == -1) {
 		std::cout << "error during recv call" << std::endl;
 		return ;
@@ -225,28 +201,70 @@ void	Server::readReceivedData(int fd)
 	}
 	else {
 		buffer[bytes_received] = '\0';
-		std::cout << "Client " << fd << " said : " << buffer << std::endl;
-        if (attributeNickName(fd, buffer))
-            return;
-
-        operatorCanals(buffer, fd);
+        completeBuffer += buffer;
+        if (completeBuffer.find('\n') != std::string::npos)
+        {
+            std::vector<std::string> splittedBuffer = splitBuffer(completeBuffer, '\n');
+            completeBuffer.erase();
+            for (size_t i = 0; i < splittedBuffer.size(); i++)
+            {
+                if (splittedBuffer[i].find('\r') != std::string::npos)
+                    splittedBuffer[i].erase(splittedBuffer[i].find('\r'), 1);
+                splittedBuffer[i] += "\r\n";
+                std::cout << "Client " << fd << " said : " << splittedBuffer[i] << std::endl;
+                operatorCanals(splittedBuffer[i].c_str(), fd);
+            }
+            splittedBuffer.erase(splittedBuffer.begin(), splittedBuffer.end());
+        }
 	}
 }
+
+//===================NICK===========================
+bool    Server::attributeNickName(int fd, const char *buffer)
+{
+    std::string find;
+    size_t nickPos;
+    size_t endLinePos;
+    find = static_cast<std::string>(buffer);
+    if (find.find("NICK") != std::string::npos)
+    {
+        for (size_t i = 0; i < _vecClient.size(); i++)
+        {
+            if (_vecClient[i].getFdClient() == fd)
+            {
+                nickPos = find.find("NICK");
+                nickPos += 5;
+                endLinePos = find.find('\n', nickPos);
+                if (endLinePos == std::string::npos)
+                    endLinePos = find.length();
+                std::string newNick = find.substr(nickPos, endLinePos - nickPos);
+                if (newNick.find(13) != std::string::npos)
+                    newNick = newNick.substr(0, newNick.size() - 1);
+                _vecClient[i].setNick(newNick);
+                std::cout << "The nick is : " << _vecClient[i].getNick() << std::endl;
+                break;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+//==================================================
+
 //===================PASS===========================
 void    Server::checkPass(const std::string &buff, int fdClient)
 {
-    (void)fdClient;
     std::string rightPass = this->_password;
     size_t passWord = buff.find("PASS ");
     if (passWord == std::string::npos)
     {
-        std::cout << "Error with command PASS, no \'PASS\'";
+        std::cout << "Error with command PASS, no \'PASS\'\n";
         return;
     }
     size_t passEnd = buff.find('\n', passWord);
     if (passEnd == std::string::npos)
     {
-        std::cout << "Error with command PASS, no \'\\n\'";
+        std::cout << "Error with command PASS, no \'\\n\'\n";
         return;
     }
     std::string passIn = buff.substr(passWord + 5, passEnd - passWord - 5);
@@ -256,12 +274,19 @@ void    Server::checkPass(const std::string &buff, int fdClient)
     }
     if (passIn != rightPass)
     {
-        Client c = findClientWithFd(fdClient);
-//        servSendMessageToClient("You enter a wrong password", c);
-//        servSendMessageToClient("You will be disconnected", c);
-//        servSendMessageToClient("QUIT :Leaving\r\n", c);
-        close(fdClient);
-        clearClient(fdClient);
+        errorPassword(findClientWithFd(fdClient));
+//        close(fdClient);
+//        clearClient(fdClient);
+    }
+    else {
+        std::cout << "PASS CORRECT\n";
+        for (size_t i = 0; i < _vecClient.size(); i++)
+        {
+            if (fdClient == _vecClient[i].getFdClient())
+            {
+                _vecClient[i].setPass();
+            }
+        }
     }
 }
 //==================================================
@@ -297,56 +322,73 @@ void    Server::splitForPrivMsg(const std::string &buff, int fdSender)
     {
         std::string to = data[1];
         std::string message = data[2];
-        std::string from;
+        Client from;
         try {
-            from = findClientWithFd(fdSender).getNick();
+            from = findClientWithFd(fdSender);
         }
         catch (std::runtime_error& e)
         {
             std::cerr << e.what() << std::endl;
             throw std::exception(); //A changer
         }
+        std::cout << from.getPass() << std::endl;
+        if (!from.getPass())
+        {
+            errorPassword(from);
+            return;
+        }
         if (!message.empty() && message[0] == ':')
         {
             message.erase(0, 1);
         }
-        sendmsg(from, to, message);
+        sendmsg(from.getNick(), to, message);
     }
 }
 //====================================================
 //=======================MODE=========================
 void    Server::splitForMode(const std::string &buff, int fdSender)
 {
-    std::vector<std::string> data;
-    data = split(buff, ' ');
-    (void)fdSender;
-    if (data.size() >= 3)
+    std::string data = buff.substr(buff.find("MODE") + 5);
+    std::vector<std::string> datas = split(data, ' ');
+    std::string channel = datas[0];
+    std::string what = datas[1];
+    Client from;
+    try {
+        from = findClientWithFd(fdSender);
+    }
+    catch (std::runtime_error& e)
     {
-        std::string channel = data[1];
-        std::string modes = data[2];
-        std::string from;
-        try {
-            from = findClientWithFd(fdSender).getNick();
-        }
-        catch (std::runtime_error& e)
+        std::cerr << e.what() << std::endl;
+        return;
+    }
+    if (!from.getPass())
+        errorPassword(from);
+    std::cout << "channel :" <<  channel << "modes : " << what << std::endl;
+    if (what.find('-') == std::string::npos && what.find('+') == std::string::npos)
+    {
+        std::cerr << "Add - or + before the channel operator";
+        return ;
+    }
+    for (size_t i = 0; i < this->_vecChannel.size(); i++)
+    {
+        if (channel == _vecChannel[i].getName())
         {
-            std::cerr << e.what() << std::endl;
-            throw std::exception(); // A changer
+            char addOrDel = what[0];
+            char mode = what[1];
+            _vecChannel[i].changeMode(addOrDel, mode, from);
         }
-        std::cout << "channel :" <<  channel << "modes : " << modes << std::endl;
-        if (modes.find('-') == std::string::npos && modes.find('+') == std::string::npos)
-        {
-            std::cerr << "Add - or + before the channel operator";
-        }
-        std::string message = ":" + from + " MODE " + channel + " " + modes + "\r\n";
     }
 }
 
 //====================================================
-void    Server::operatorCanals(char *buffer, int fdSender) // A transformer en switch case ?
+void    Server::operatorCanals(const char *buffer, int fdSender) // A transformer en switch case ?
 {
     std::string buff = static_cast<std::string>(buffer);
 
+    if (buff.find("NICK") != std::string::npos)
+    {
+        attributeNickName(fdSender, buffer);
+    }
     if (buff.find("PRIVMSG") != std::string::npos)
     {
         splitForPrivMsg(buff, fdSender);
@@ -354,6 +396,10 @@ void    Server::operatorCanals(char *buffer, int fdSender) // A transformer en s
     if (buff.find("MODE") != std::string::npos)
     {
         splitForMode(buff, fdSender);
+    }
+    if (buff.find("PASS") != std::string::npos)
+    {
+        checkPass(buff, fdSender);
     }
 }
 
