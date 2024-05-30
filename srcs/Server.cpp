@@ -32,6 +32,10 @@ void Server::addPollFd(const pollfd &fd)
     _vecPollFd.push_back(fd);
 }
 
+void Server::addChannel(const Channel &channel) {
+	_vecChannel.push_back(channel);
+}
+
 void Server::clearClient(int fd) //? Peut etre closes les fds
 {
     for (size_t i = 0; i < _vecClient.size(); i++)
@@ -225,7 +229,7 @@ void	Server::readReceivedData(int fd)
 	}
 	else {
 		buffer[bytes_received] = '\0';
-		std::cout << "Client " << fd << " said : " << buffer << std::endl;
+		// std::cout << "Client " << fd << " said : " << buffer << std::endl;
         if (attributeNickName(fd, buffer))
             return;
 
@@ -286,7 +290,7 @@ void    Server::sendmsg(const std::string &from, const std::string &to, const st
         std::cout << "Error when send data for a PRIVMSG" << std::endl;
         throw std::exception(); // afficher erreur envoie des donnees
     }
-    std::cout << "bytesSend : " << bytesSend << std::endl;
+    // std::cout << "bytesSend : " << bytesSend << std::endl;
 }
 
 void    Server::splitForPrivMsg(const std::string &buff, int fdSender)
@@ -346,15 +350,21 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
 void    Server::operatorCanals(char *buffer, int fdSender) // A transformer en switch case ?
 {
     std::string buff = static_cast<std::string>(buffer);
+	std::cout << "received message :" << buff << std::endl;
 
-    if (buff.find("PRIVMSG") != std::string::npos)
+	if (findClientWithFd(fdSender).getInChannel() == true)
+		channelMsg(buffer, fdSender);
+    else if (buff.find("PRIVMSG") != std::string::npos)
     {
         splitForPrivMsg(buff, fdSender);
     }
-    if (buff.find("MODE") != std::string::npos)
+    else if (buff.find("MODE") != std::string::npos)
     {
         splitForMode(buff, fdSender);
     }
+	else if (buff.find("JOIN") != std::string::npos){
+		splitForJoin(buff, fdSender);
+	}
 }
 
 void	Server::servLoop()
