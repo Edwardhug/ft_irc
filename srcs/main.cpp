@@ -6,9 +6,16 @@
 
 bool g_signal = false;
 
+bool validArg(char **av)
+{
+	if (ft_atoi(av[1]) < 1024 || ft_atoi(av[1]) > 49151)
+		return false;
+	return true;
+}
+
 int	main(int ac, char **av)
 {
-	if (ac != 3)
+	if (ac != 3  || validArg(av) == false)
 	{
 		std::cerr << "Usage: " << av[0] << " <port number> <password>" << std::endl;
 		return (1);
