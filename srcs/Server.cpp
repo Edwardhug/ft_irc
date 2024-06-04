@@ -214,7 +214,6 @@ void	Server::readReceivedData(int fd)
                 if (splittedBuffer[i].find('\r') != std::string::npos)
                     splittedBuffer[i].erase(splittedBuffer[i].find('\r'), 1);
                 splittedBuffer[i] += "\r\n";
-                std::cout << "Client " << fd << " said : " << splittedBuffer[i] << std::endl;
                 operatorCanals(splittedBuffer[i].c_str(), fd);
             }
             splittedBuffer.erase(splittedBuffer.begin(), splittedBuffer.end());
@@ -387,11 +386,10 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
 void    Server::operatorCanals(const char *buffer, int fdSender) // A transformer en switch case ?
 {
     std::string buff = static_cast<std::string>(buffer);
-	std::cout << "received message :" << buff << std::endl;
 
-    if (findClientWithFd(fdSender).getInChannel() == true)
+    if (buff.find("PRIVMSG") != std::string::npos && buff.size() > 8 && buff[8] == '#')
     {
-        channelMsg(const_cast<char*>(buffer), fdSender); // Peut faire des trucs bizarre, si tu comprends pas ca vient surement de la :)
+        channelMsg(const_cast<char*>(buffer), fdSender);
     }
     else if (buff.find("NICK") != std::string::npos)
     {
@@ -401,10 +399,10 @@ void    Server::operatorCanals(const char *buffer, int fdSender) // A transforme
     {
         splitForPrivMsg(buff, fdSender);
     }
-    else if (buff.find("MODE") != std::string::npos)
-    {
-        splitForMode(buff, fdSender);
-    }
+    // else if (buff.find("MODE") != std::string::npos)
+    // {
+    //     splitForMode(buff, fdSender);
+    // }
 	else if (buff.find("JOIN") != std::string::npos){
 		splitForJoin(buff, fdSender);
 	}

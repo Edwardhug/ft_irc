@@ -76,13 +76,13 @@ void	Server::splitForJoin(std::string buff, int fdSender)
     {
 		Channel newChannel(data[1], &client);
 		addChannel(newChannel);
-		client.changeChannelBool();
+		client.changeChannelBool(true);
 		client.setChannel(findChannelWithName(data[1]));
 		sendConfirmation(data, client);
 	}
 	else if (data.size() >= 2 && channelExist(data[1]) == true) {
 		addClientToChannel(data[1], client);
-		client.changeChannelBool();
+		client.changeChannelBool(true);
 		client.setChannel(findChannelWithName(data[1]));
 		sendConfirmation(data, client);
 	}

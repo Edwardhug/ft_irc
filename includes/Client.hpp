@@ -30,7 +30,7 @@ class Client
     bool getPass() const;
     void setPass();
 	bool	getInChannel();
-	void	changeChannelBool();
+	void	changeChannelBool(bool value);
 	void	setChannel(Channel &channel);
 	Channel getActiveChannel();
 };

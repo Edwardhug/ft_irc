@@ -51,11 +51,11 @@ bool	Client::getInChannel() {
 	return (_inChannel);
 }
 
-void	Client::changeChannelBool() {
-	if (_inChannel == true)
-		_inChannel = false;
-	else if (_inChannel == false)
+void	Client::changeChannelBool(bool value) {
+	if (value == true)
 		_inChannel = true;
+	else
+		_inChannel = false;
 }
 
 void	Client::setChannel(Channel &channel) {
