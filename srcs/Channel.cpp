@@ -125,3 +125,12 @@ std::vector<Client*> Channel::getVecClient() {
 	return (_clients);
 }
 
+void Channel::setTopic(std::string topic)
+{
+    this->_topic = topic;
+}
+
+std::string Channel::getTopic()
+{
+    return this->_topic;
+}

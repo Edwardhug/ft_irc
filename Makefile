@@ -8,6 +8,7 @@ SRCS =	main.cpp \
 		Server.cpp \
 		utils.cpp \
 		Channel.cpp \
+		Topic.cpp \
 		Join.cpp 
 
 INCLUDE =	lib.hpp \

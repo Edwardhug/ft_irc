@@ -30,6 +30,8 @@ class Channel {
 	std::vector<Client*> getVecClient();
     void deleteOperator(std::string target);
     void addOperator(std::string target);
+    void setTopic(std::string topic);
+    std::string getTopic();
 };
 
 #endif

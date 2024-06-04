@@ -89,7 +89,7 @@ void	Server::splitForJoin(std::string buff, int fdSender)
 }
 //==============================channel msg=============================
 
-char *getMessage(char *buffer) {
+char *Server::getMessage(char *buffer) {
 	char *message = strchr(buffer, ':');
 	if (message == NULL) {
 		return buffer;
@@ -112,15 +112,6 @@ void Server::channelMsg(char *buffer, int fdSender) {
     std::string channelName = findChannelName(buffer);
     Channel channel = findChannelWithName(channelName);
 	channelName.resize(channelName.size() - 1);
-
-    // if (channel.getName() != copy.getName()) {
-    //     std::cerr << RED << "different" << RESET << std::endl;
-    //     return;
-    // }
-    // else {
-    //     std::cerr << GREEN << "same" << RESET << std::endl;
-    // }
-
 	std::string fullMessage = ":" + senderClient.getNick() + "!" + senderClient.getNick() + "@server PRIVMSG " + channelName + " :" + message + "\r\n";
     std::vector<Client*> vecClient = channel.getVecClient();
     for (size_t i = 0; i < vecClient.size(); ++i) {
