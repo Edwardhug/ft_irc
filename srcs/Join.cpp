@@ -57,8 +57,18 @@ Channel &Server::findChannelWithName(std::string name) {
 	return _vecChannel[i]; // arrive jamais ici parce qu'on fait les check avant
 }
 
+bool isValidName(std::string name) {
+    if (name[5] != '#') {
+        std::cout << RED << "Error: Invalid channel name. Channel name must start with #." << RESET << std::endl;
+        return false;
+    }
+    return true;
+}
+
 void	Server::splitForJoin(std::string buff, int fdSender)
 {
+    if (isValidName(buff) == false) {
+        return;}
 	std::vector<std::string> data;
 	Client &client = findClientWithFd(fdSender);
     data = split(buff, ' ');
@@ -95,7 +105,6 @@ void Server::channelMsg(char *buffer, int fdSender) {
     std::string channelName = channel.getName();
 	channelName.resize(channelName.size() - 1);
 
-	std::cout << "channelName: " << channelName << "fin du channelName"  <<std::endl;
 	std::string fullMessage = ":" + senderClient.getNick() + "!" + senderClient.getNick() + "@server PRIVMSG " + channelName + " :" + message + "\r\n";
     std::vector<Client*> vecClient = channel.getVecClient();
     for (size_t i = 0; i < vecClient.size(); ++i) {
@@ -103,10 +112,9 @@ void Server::channelMsg(char *buffer, int fdSender) {
         if (clientFd != fdSender) {
             ssize_t bytesSent = send(clientFd, fullMessage.c_str(), fullMessage.length(), 0);
             if (bytesSent == -1) {
-                std::cerr << "Error when sending data to client " << vecClient[i]->getNick() << ": ";
+                std::cerr << RED << "Error when sending data to client " << vecClient[i]->getNick() << ": ";
                 perror("");
-            } else {
-                std::cout << "Sent message to " << vecClient[i]->getNick() << std::endl;
+                std::cerr << RESET;
             }
         }
     }
