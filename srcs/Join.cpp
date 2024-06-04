@@ -119,5 +119,3 @@ void Server::channelMsg(char *buffer, int fdSender) {
         }
     }
 }
-
-
