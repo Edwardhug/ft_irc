@@ -33,6 +33,7 @@ class Client
 	void	changeChannelBool(bool value);
 	void	setChannel(Channel &channel);
 	Channel getActiveChannel();
+    bool operator==(const Client& other) const;
 };
 
 #endif

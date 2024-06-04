@@ -9,7 +9,8 @@
 #include <sys/socket.h>
 #include "Client.hpp"
 #include "Channel.hpp"
-
+class Channel;
+class Client;
 class Server 
 {
     private:

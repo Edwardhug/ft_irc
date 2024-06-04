@@ -207,6 +207,7 @@ void	Server::readReceivedData(int fd)
         completeBuffer += buffer;
         if (completeBuffer.find('\n') != std::string::npos)
         {
+            std::cout << "begin : \n" << completeBuffer << "\n end\n";
             std::vector<std::string> splittedBuffer = splitBuffer(completeBuffer, '\n');
             completeBuffer.erase();
             for (size_t i = 0; i < splittedBuffer.size(); i++)
@@ -350,8 +351,18 @@ void    Server::splitForPrivMsg(const std::string &buff, int fdSender)
 //=======================MODE=========================
 void    Server::splitForMode(const std::string &buff, int fdSender)
 {
+    std::string target;
     std::string data = buff.substr(buff.find("MODE") + 5);
     std::vector<std::string> datas = split(data, ' ');
+    if (datas.size() == 1)
+    {
+        //peut etre afficher un message
+        return ;
+    }
+    if (datas.size() == 3)
+    {
+        target = datas[2];
+    }
     std::string channel = datas[0];
     std::string what = datas[1];
     Client from;
@@ -377,7 +388,10 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
         {
             char addOrDel = what[0];
             char mode = what[1];
-            _vecChannel[i].changeMode(addOrDel, mode, from);
+            if (target.empty())
+                _vecChannel[i].changeMode(addOrDel, mode, from, NULL);
+            else
+                _vecChannel[i].changeMode(addOrDel, mode, from, target);
         }
     }
 }
@@ -399,10 +413,10 @@ void    Server::operatorCanals(const char *buffer, int fdSender) // A transforme
     {
         splitForPrivMsg(buff, fdSender);
     }
-    // else if (buff.find("MODE") != std::string::npos)
-    // {
-    //     splitForMode(buff, fdSender);
-    // }
+    else if (buff.find("MODE") != std::string::npos)
+    {
+     splitForMode(buff, fdSender);
+    }
 	else if (buff.find("JOIN") != std::string::npos){
 		splitForJoin(buff, fdSender);
 	}
