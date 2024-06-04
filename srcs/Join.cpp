@@ -109,12 +109,12 @@ std::string findChannelName(char *buffer) {
 void Server::channelMsg(char *buffer, int fdSender) {
     Client &senderClient = findClientWithFd(fdSender);
 	char *message = getMessage(buffer);
-    Channel channel = senderClient.getActiveChannel();
     std::string channelName = findChannelName(buffer);
+    Channel channel = findChannelWithName(channelName);
 	channelName.resize(channelName.size() - 1);
 
-    // if (channelName != copy) {
-    //     std::cerr << RED << "different, copy = " << copy << ". and name = " << channelName << "." <<RESET << std::endl;
+    // if (channel.getName() != copy.getName()) {
+    //     std::cerr << RED << "different" << RESET << std::endl;
     //     return;
     // }
     // else {
