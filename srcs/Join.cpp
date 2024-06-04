@@ -74,6 +74,11 @@ void	Server::splitForJoin(std::string buff, int fdSender)
     data = split(buff, ' ');
 	if (data.size() >= 2 && channelExist(data[1]) == false)
     {
+//        if (data[1].find("\r") != std::string::npos && data[1].find("\n") != std::string::npos)
+//        {
+//            std::cout << data[1] << " " << data[1].size() << std::endl;
+//            data[1].resize(data[1].size() - 1);
+//        }
 		Channel newChannel(data[1], &client);
 		addChannel(newChannel);
 		client.changeChannelBool(true);
@@ -81,6 +86,8 @@ void	Server::splitForJoin(std::string buff, int fdSender)
 		sendConfirmation(data, client);
 	}
 	else if (data.size() >= 2 && channelExist(data[1]) == true) {
+//        if (data[1].find("\r") != std::string::npos && data[1].find("\n") != std::string::npos)
+//            data[1].resize(data[1].size() -1);
 		addClientToChannel(data[1], client);
 		client.changeChannelBool(true);
 		client.setChannel(findChannelWithName(data[1]));

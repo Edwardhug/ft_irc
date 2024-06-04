@@ -415,7 +415,7 @@ void    Server::operatorCanals(const char *buffer, int fdSender) // A transforme
     }
     else if (buff.find("MODE") != std::string::npos)
     {
-     splitForMode(buff, fdSender);
+        splitForMode(buff, fdSender);
     }
 	else if (buff.find("JOIN") != std::string::npos){
 		splitForJoin(buff, fdSender);
@@ -423,6 +423,10 @@ void    Server::operatorCanals(const char *buffer, int fdSender) // A transforme
     else if (buff.find("PASS") != std::string::npos)
     {
         checkPass(buff, fdSender);
+    }
+    else if (buff.find("INVITE") != std::string::npos)
+    {
+        inviteClient(buff, fdSender);
     }
 }
 

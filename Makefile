@@ -8,7 +8,9 @@ SRCS =	main.cpp \
 		Server.cpp \
 		utils.cpp \
 		Channel.cpp \
-		Join.cpp 
+		Join.cpp \
+		Modes.cpp \
+		Invite.cpp \
 
 INCLUDE =	lib.hpp \
 			Client.hpp \
