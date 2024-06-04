@@ -424,6 +424,9 @@ void    Server::operatorCanals(const char *buffer, int fdSender) // A transforme
     {
         checkPass(buff, fdSender);
     }
+    else if (buff.find("TOPIC") != std::string::npos) {
+        splitForTopic(buff, fdSender);
+    }
     else if (buff.find("INVITE") != std::string::npos)
     {
         inviteClient(buff, fdSender);

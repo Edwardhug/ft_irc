@@ -58,6 +58,8 @@ public:
 	void    checkPass(const std::string &buff, int fdClient);
 	void servSendMessageToClient(const std::string &message, Client &client);
     void errorPassword(Client& client);
+    char *getMessage(char *buffer);
+    void splitForTopic(std::string buff, int fdSender);
     void inviteClient(std::string &buff, int fdSender);
 };
 

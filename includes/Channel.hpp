@@ -30,10 +30,13 @@ class Channel {
 	std::vector<Client*> getVecClient();
     void deleteOperator(std::string target);
     void addOperator(std::string target);
+    void setTopic(std::string topic);
+    std::string getTopic();
+    bool checkPerm(char mode);
+    bool checkOperator(Client &client);
     void addModes(char mode, Client& from, std::string target);
     void delModes(char mode, Client& from, std::string target);
     bool clientInChannel(Client &toFind);
-    bool checkOperator(Client &client);
 };
 
 #endif
