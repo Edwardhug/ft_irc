@@ -32,6 +32,8 @@ class Channel {
     void addOperator(std::string target);
     void setTopic(std::string topic);
     std::string getTopic();
+    bool checkPerm(char mode);
+    bool checkOperator(Client &client);
 };
 
 #endif

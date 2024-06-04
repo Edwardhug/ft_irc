@@ -134,3 +134,20 @@ std::string Channel::getTopic()
 {
     return this->_topic;
 }
+
+bool Channel::checkPerm(char mode)
+{
+    std::map<char, bool>::iterator it;
+    it = _modes.find(mode);
+    return it->second;
+}
+
+bool Channel::checkOperator(Client &client)
+{
+    for (size_t i = 0; i < _operators.size(); i++)
+    {
+        if (*_operators[i] == client)
+            return true;
+    }
+    return false;
+}
