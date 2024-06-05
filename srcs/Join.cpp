@@ -110,7 +110,7 @@ std::string findChannelName(char *buffer) {
     for (size_t i = 8; buffer[i] != ' '; ++i) {
         channelName += buffer[i];
     }
-    return channelName + "\r\n";
+    return channelName;
 }
 
 void Server::channelMsg(char *buffer, int fdSender) {
@@ -118,7 +118,6 @@ void Server::channelMsg(char *buffer, int fdSender) {
 	char *message = getMessage(buffer);
     std::string channelName = findChannelName(buffer);
     Channel channel = findChannelWithName(channelName);
-	channelName.resize(channelName.size() - 1);
 	std::string fullMessage = ":" + senderClient.getNick() + "!" + senderClient.getNick() + "@server PRIVMSG " + channelName + " :" + message + "\r\n";
     std::vector<Client*> vecClient = channel.getVecClient();
     for (size_t i = 0; i < vecClient.size(); ++i) {
