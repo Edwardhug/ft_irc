@@ -7,6 +7,9 @@ void	Server::splitForTopic(std::string buff, int fdSender) {
 	std::vector<std::string> data;
 	Client &client = findClientWithFd(fdSender);
 	data = split(buff, ' ');
+	if (channelExist(data[1]) == false) {
+		return ERR_NOSUCHCHANNEL(client, data[1]);
+	}
 	Channel &channel = findChannelWithName(data[1]);
 	std::string channelName = channel.getName();
 	if (data.size() >= 3 && data[2] == ":: " && channelExist(data[1]) == true) {

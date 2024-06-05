@@ -35,8 +35,8 @@ void Channel::setTopic(std::string topic)
         topic = topic.substr(0, 50);
     if (topic[0] == ':')
         topic = topic.substr(1, topic.length() - 1);
-    if (topic.find(" ") != std::string::npos)
-        topic = topic.substr(0, topic.find(" "));
+    if (topic[topic.length()] == ' ')
+        topic = topic.substr(0, topic.length() - 1);
     this->_topic = topic;
 }
 
