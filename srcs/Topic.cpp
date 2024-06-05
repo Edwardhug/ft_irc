@@ -28,3 +28,4 @@ void Server::splitForTopic(std::string buff, int fdSender) {
 		servSendMessageToClient(message, client);
 	}
 }
+ 
