@@ -31,6 +31,12 @@ std::vector<Client*> Channel::getVecClient() {
 
 void Channel::setTopic(std::string topic)
 {
+    if (topic.length() > 50)
+        topic = topic.substr(0, 50);
+    if (topic[0] == ':')
+        topic = topic.substr(1, topic.length() - 1);
+    if (topic.find(" ") != std::string::npos)
+        topic = topic.substr(0, topic.find(" "));
     this->_topic = topic;
 }
 

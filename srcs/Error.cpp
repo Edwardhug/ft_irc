@@ -13,7 +13,7 @@ void ERR_NOSUCHCHANNEL(Client& client, std::string channel)
 
 void ERR_NEEDMOREPARAMS(Client& client)
 {
-    std::string err = ":server 461 " + client.getNick() + " INVITE :Not enough parameters";
+    std::string err = ":server 461 " + client.getNick() + " INVITE :Not enough parameters\r\n";
     sendErrorToClient(err, client);
 }
 
