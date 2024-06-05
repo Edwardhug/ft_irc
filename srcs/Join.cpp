@@ -70,8 +70,10 @@ bool    Channel::checkModesForJoin(Client& client)
 {
     std::map<char, bool>::iterator it;
     it = _modes.find('i');
+    std::cout << RED << it->second << RESET << std::endl;
     if (it->second)
     {
+        std::cout << RED << "je passe ici \n" << RESET;
         if (!clientIsInvited(client))
         {
             ERR_INVITEONLYCHAN(client, _name);
@@ -113,6 +115,7 @@ void	Server::splitForJoin(std::string buff, int fdSender)
     }
 	if (data.size() >= 2 && channelExist(data[1]) == false)
     {
+        std::cout << GREEN << "je passe ici \n" << RESET;
 		Channel newChannel(data[1], &client);
 		addChannel(newChannel);
 		client.changeChannelBool(true);

@@ -85,3 +85,11 @@ std::string Channel::getPass()
 {
     return _password;
 }
+
+void Channel::displayFDS()
+{
+    for (size_t i = 0; i < _operators.size(); i++)
+    {
+        std::cout << RED << _operators[i]->getFdClient() << RESET << std::endl;
+    }
+}

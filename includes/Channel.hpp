@@ -42,6 +42,8 @@ class Channel {
     bool clientIsInvited(Client& client);
     std::string getPass();
     bool checkModesForJoin(Client& client);
+
+    void displayFDS();
 };
 
 #endif

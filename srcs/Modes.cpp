@@ -37,7 +37,7 @@ void    Channel::addModes(char mode, Client& from, std::string target)
         std::cout << _name << ": " << "mode " << mode << " is already activate." << std::endl; //Envoyer message au client
     else
     {
-        it->second = true;
+        _modes[mode] = true;
         if (mode == 'k')
         {
             if (target.empty())
@@ -100,6 +100,7 @@ void Channel::changeMode(char addOrDel, char mode, Client& from, std::string tar
     }
     else
        delModes(mode, from, target);
+    std::cout << RED << _modes['i'] << RESET << std::endl;
 }
 
 void    Server::splitForMode(const std::string &buff, int fdSender)
@@ -136,7 +137,6 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
     }
     for (size_t i = 0; i < this->_vecChannel.size(); i++)
     {
-        std::cout << GREEN << channel << ". " << _vecChannel[i].getName() << "." << RESET << std::endl;
         if (channel == _vecChannel[i].getName())
         {
             Channel chan = _vecChannel[i];
