@@ -214,7 +214,7 @@ void	Server::readReceivedData(int fd)
             {
                 if (splittedBuffer[i].find('\r') != std::string::npos)
                     splittedBuffer[i].erase(splittedBuffer[i].find('\r'), 1);
-                splittedBuffer[i] += "\r\n";
+                //splittedBuffer[i] += "\r\n";
                 operatorCanals(splittedBuffer[i].c_str(), fd);
             }
             splittedBuffer.erase(splittedBuffer.begin(), splittedBuffer.end());

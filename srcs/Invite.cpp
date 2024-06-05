@@ -29,11 +29,19 @@ void Server::inviteClient(std::string &buff, int fdSender)
         servSendMessageToClient(err, from);
         return;
     }
-    // TODO : Check si channel mode +i et client is operator
-//    if (!chToFind->checkOperator(from))
-//    {
-//        // TODO : ERR_CHANOPRIVSNEEDED
-//    }
+    if (!chToFind->clientInChannel(from))
+    {
+        std::string err = ":server 442 " + from.getNick() + " " + channel + " :You're not on that channel\r\n";
+        servSendMessageToClient(err, from);
+        return ;
+    }
+    // TODO : Tester plus, ca n'a pas l'air de marcher
+    if (chToFind->checkPerm('i') && !chToFind->checkOperator(from))
+    {
+        std::string err = ":server 482 " + from.getNick() + " " + channel + " :You're not channel operator\r\n";
+        servSendMessageToClient(err, from);
+        return ;
+    }
     Client *newClient = NULL;
     for (size_t i = 0; i < _vecClient.size(); i++)
     {
@@ -45,7 +53,6 @@ void Server::inviteClient(std::string &buff, int fdSender)
     }
     if (newClient == NULL)
     {
-        // TODO : ERR_NOSUCHCLIENT
         std::string err = ":server 403 " + from.getNick() + " " + newClientNick + " :No such client\r\n";
         servSendMessageToClient(err, from);
         return ;
