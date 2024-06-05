@@ -71,3 +71,4 @@ bool Channel::clientInChannel(Client &toFind)
     }
     return false;
 }
+ 
