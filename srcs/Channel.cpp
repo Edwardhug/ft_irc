@@ -72,3 +72,14 @@ bool Channel::clientInChannel(Client &toFind)
     return false;
 }
  
+void    Channel::removeClient(Client &toRemove)
+{
+    for (size_t i = 0; i < _clients.size(); i++)
+    {
+        if (_clients[i]->getFdClient() == toRemove.getFdClient())
+        {
+            _clients.erase(_clients.begin() + i);
+            return;
+        }
+    }
+}

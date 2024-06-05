@@ -12,6 +12,7 @@ SRCS =	main.cpp \
 		Invite.cpp \
 		Topic.cpp \
 		Join.cpp \
+		Kick.cpp \
 		Error.cpp \
 
 INCLUDE =	lib.hpp \

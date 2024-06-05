@@ -61,6 +61,7 @@ public:
     char *getMessage(char *buffer);
     void splitForTopic(std::string buff, int fdSender);
     void inviteClient(std::string &buff, int fdSender);
+    void kickClient(std::string &buff, int fdSender);
 };
 
 #endif

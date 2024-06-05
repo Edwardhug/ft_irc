@@ -408,6 +408,10 @@ void    Server::operatorCanals(const char *buffer, int fdSender) // A transforme
     {
         inviteClient(buff, fdSender);
     }
+    else if (buff.find("KICK") != std::string::npos)
+    {
+        kickClient(buff, fdSender);
+    }
 }
 
 void	Server::servLoop()

@@ -37,6 +37,7 @@ class Channel {
     void addModes(char mode, Client& from, std::string target);
     void delModes(char mode, Client& from, std::string target);
     bool clientInChannel(Client &toFind);
+    void removeClient(Client &toRemove);
 };
 
 #endif

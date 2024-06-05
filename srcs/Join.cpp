@@ -5,6 +5,7 @@
 #include "../includes/lib.hpp"
 #include <cstdio>
 #include <cstring>
+#include "../includes/Error.hpp"
 
 void	Server::sendConfirmation(std::vector<std::string> data, Client &client) {
 	std::string joinMsg = ":" + client.getNick() + " JOIN " + data[1] + "\r\n";
@@ -120,6 +121,9 @@ void Server::channelMsg(char *buffer, int fdSender) {
     Channel channel = findChannelWithName(channelName);
 	std::string fullMessage = ":" + senderClient.getNick() + "!" + senderClient.getNick() + "@server PRIVMSG " + channelName + " :" + message + "\r\n";
     std::vector<Client*> vecClient = channel.getVecClient();
+    if (channel.clientInChannel(senderClient) == false) {
+        return ERR_NOTONCHANNEL(senderClient, channelName);
+    }
     for (size_t i = 0; i < vecClient.size(); ++i) {
         int clientFd = vecClient[i]->getFdClient();
         if (clientFd != fdSender) {
