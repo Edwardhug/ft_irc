@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include "../includes/lib.hpp"
+#include "../includes/Error.hpp"
 #include <cstdio>
 #include <cstring>
 
@@ -65,20 +66,53 @@ bool isValidName(std::string name) {
     return true;
 }
 
+bool    Channel::checkModesForJoin(Client& client)
+{
+    std::map<char, bool>::iterator it;
+    it = _modes.find('i');
+    if (it->second)
+    {
+        if (!clientIsInvited(client))
+        {
+            ERR_INVITEONLYCHAN(client, _name);
+            return false;
+        }
+    }
+    it = _modes.find('l');
+    if (it->second)
+    {
+        if (_clients.size() == _maxClient)
+        {
+            ERR_CHANNELISFULL(client, _name);
+            return false;
+        }
+    }
+    return true;
+}
+
 void	Server::splitForJoin(std::string buff, int fdSender)
 {
     if (isValidName(buff) == false) {
-        return;}
+        return;
+    }
 	std::vector<std::string> data;
-	Client &client = findClientWithFd(fdSender);
+	Client client;
+    try
+    {
+        client = findClientWithFd(fdSender);
+    }
+    catch (std::runtime_error& e)
+    {
+        std::cout << e.what() << std::endl;
+        return ;
+    }
     data = split(buff, ' ');
+    if (data.size() < 2)
+    {
+        return ERR_NEEDMOREPARAMS(client);
+    }
 	if (data.size() >= 2 && channelExist(data[1]) == false)
     {
-//        if (data[1].find("\r") != std::string::npos && data[1].find("\n") != std::string::npos)
-//        {
-//            std::cout << data[1] << " " << data[1].size() << std::endl;
-//            data[1].resize(data[1].size() - 1);
-//        }
 		Channel newChannel(data[1], &client);
 		addChannel(newChannel);
 		client.changeChannelBool(true);
@@ -86,8 +120,15 @@ void	Server::splitForJoin(std::string buff, int fdSender)
 		sendConfirmation(data, client);
 	}
 	else if (data.size() >= 2 && channelExist(data[1]) == true) {
-//        if (data[1].find("\r") != std::string::npos && data[1].find("\n") != std::string::npos)
-//            data[1].resize(data[1].size() -1);
+        Channel& channel = findChannelWithName(data[1]);
+        channel.checkModesForJoin(client);
+        if (channel.checkPerm('k'))
+        {
+            if (data.size() < 3)
+                return ERR_BADCHANNELKEY(client, data[1]);
+            if (data[2] != channel.getPass())
+                return ERR_BADCHANNELKEY(client, data[1]);
+        }
 		addClientToChannel(data[1], client);
 		client.changeChannelBool(true);
 		client.setChannel(findChannelWithName(data[1]));

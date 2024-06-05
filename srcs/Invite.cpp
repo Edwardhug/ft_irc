@@ -49,7 +49,7 @@ void Server::inviteClient(std::string &buff, int fdSender)
     {
         return ERR_USERONCHANNEL(from, newClientNick, channel);
     }
-    chToFind->addClient(newClient);
+    chToFind->addClientInvited(newClient);
     // TODO : TROUVER COMMENT FIX, message pas complet
     std::string rlpInviting = ":server 341 " + from.getNick() + " " + newClientNick + " " + channel + "\r\n";
     servSendMessageToClient(rlpInviting, from);

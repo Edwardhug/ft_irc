@@ -68,17 +68,5 @@ Channel Client::getActiveChannel() {
 
 bool    Client::operator==(const Client &other) const
 {
-    bool isEqual = true;
-    if (this->_fdClient != other._fdClient)
-        isEqual = false;
-    if (this->_ipAddrClient != other._ipAddrClient)
-        isEqual = false;
-    if (this->_nick != other._nick)
-        isEqual = false;
-    if (this->_corrPass != other._corrPass)
-        isEqual = false;
-    if (this->_inChannel != other._inChannel)
-        isEqual = false;
-    //faire activeChannel
-    return isEqual;
+    return _fdClient == other._fdClient;
 }

@@ -247,15 +247,20 @@ void    Server::checkPass(const std::string &buff, int fdClient)
 {
     std::string rightPass = this->_password;
     size_t passWord = buff.find("PASS ");
-    if (passWord == std::string::npos)
+    Client from;
+    try
     {
-        std::cout << "Error with command PASS, no \'PASS\'\n";
-        return;
+        from = findClientWithFd(fdClient);
+    }
+    catch (std::runtime_error& e)
+    {
+        std::cout << e.what() << std::endl;
+        return ;
     }
     std::string passIn = buff.substr(passWord + 5);
     if (passIn != rightPass)
     {
-        errorPassword(findClientWithFd(fdClient));
+        return ERR_PASSWDISMATCH(from);
     }
     else {
         std::cout << "PASS CORRECT\n";
@@ -280,7 +285,7 @@ void    Server::sendmsg(const std::string &from, const std::string &to, const st
     catch (const std::runtime_error& e)
     {
         std::cerr << e.what() << std::endl;
-        throw std::exception(); // A changer
+        return ;
     }
     std::string completeMessage = ":" + from + " PRIVMSG " + to + " :" + message + "\r\n";
     ssize_t bytesSend;
@@ -288,28 +293,29 @@ void    Server::sendmsg(const std::string &from, const std::string &to, const st
     if (bytesSend == -1)
     {
         std::cout << "Error when send data for a PRIVMSG" << std::endl;
-        throw std::exception(); // afficher erreur envoie des donnees
+        return ;
     }
-    // std::cout << "bytesSend : " << bytesSend << std::endl;
 }
 
 void    Server::splitForPrivMsg(const std::string &buff, int fdSender)
 {
     std::vector<std::string> data;
     data = split(buff, ' ');
-    if (data.size() >= 3)
+    Client from;
+    try {
+        from = findClientWithFd(fdSender);
+    }
+    catch (std::runtime_error& e)
+    {
+        std::cerr << e.what() << std::endl;
+        return ;
+    }
+    if (data.size() < 3)
+        return ERR_NEEDMOREPARAMS(from);
     {
         std::string to = data[1];
         std::string message = data[2];
-        Client from;
-        try {
-            from = findClientWithFd(fdSender);
-        }
-        catch (std::runtime_error& e)
-        {
-            std::cerr << e.what() << std::endl;
-            throw std::exception(); //A changer
-        }
+
         if (!from.getPass())
         {
             errorPassword(from);
@@ -321,58 +327,7 @@ void    Server::splitForPrivMsg(const std::string &buff, int fdSender)
         }
         sendmsg(from.getNick(), to, message);
     }
-    // TODO : ERR_NEEDMOREPARAMETERS
 }
-//====================================================
-//=======================MODE=========================
-void    Server::splitForMode(const std::string &buff, int fdSender)
-{
-    std::string target;
-    std::string data = buff.substr(buff.find("MODE") + 5);
-    std::vector<std::string> datas = split(data, ' ');
-    Client from;
-    try {
-        from = findClientWithFd(fdSender);
-    }
-    catch (std::runtime_error& e)
-    {
-        std::cerr << e.what() << std::endl;
-        return;
-    }
-    if (datas.size() < 2)
-    {
-        return ERR_NEEDMOREPARAMS(from);
-    }
-    if (datas.size() == 3)
-    {
-        target = datas[2];
-    }
-    std::string channel = datas[0];
-    std::string what = datas[1];
-
-    if (!from.getPass())
-        errorPassword(from);
-    if (what.find('-') == std::string::npos && what.find('+') == std::string::npos)
-    {
-        std::cerr << "Add - or + before the channel operator";
-        return ;
-    }
-    for (size_t i = 0; i < this->_vecChannel.size(); i++)
-    {
-        if (channel == _vecChannel[i].getName())
-        {
-            char addOrDel = what[0];
-            char mode = what[1];
-            if (target.empty())
-            {
-                _vecChannel[i].changeMode(addOrDel, mode, from, "");
-            }
-            else
-                _vecChannel[i].changeMode(addOrDel, mode, from, target);
-        }
-    }
-}
-
 //====================================================
 void    Server::operatorCanals(const char *buffer, int fdSender) // A transformer en switch case ?
 {

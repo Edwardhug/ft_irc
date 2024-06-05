@@ -24,6 +24,10 @@ void	Channel::addClient(Client *newClient) {
 	_clients.push_back(newClient);
 }
 
+void    Channel::addClientInvited(Client *newClient)
+{
+    _clientsInvited.push_back(newClient);
+}
 
 std::vector<Client*> Channel::getVecClient() {
 	return (_clients);
@@ -50,6 +54,7 @@ bool Channel::checkOperator(Client &client)
 {
     for (size_t i = 0; i < _operators.size(); i++)
     {
+        std::cout << client.getFdClient() << " " << (*_operators[i]).getFdClient() << std::endl;
         if (*_operators[i] == client)
             return true;
     }
@@ -64,4 +69,19 @@ bool Channel::clientInChannel(Client &toFind)
             return true;
     }
     return false;
+}
+
+bool Channel::clientIsInvited(Client &client)
+{
+    for (size_t i = 0; i < _clientsInvited.size(); i++)
+    {
+        if (*_clientsInvited[i] == client)
+            return true;
+    }
+    return false;
+}
+
+std::string Channel::getPass()
+{
+    return _password;
 }

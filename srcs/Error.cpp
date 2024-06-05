@@ -39,3 +39,27 @@ void ERR_WASNOSUCHNICK(Client& client, std::string nick)
     std::string err = ":server 406 " + client.getNick() + " " + nick + " :There was no such nickname\r\n";
     sendErrorToClient(err, client);
 }
+
+void ERR_PASSWDISMATCH(Client& client)
+{
+    std::string err = ":server 464 " + client.getNick() + " :Password incorrect\r\n";
+    sendErrorToClient(err, client);
+}
+
+void ERR_CHANNELISFULL(Client& client, std::string channel)
+{
+    std::string err = ":server 471 " + client.getNick() + " " + channel + " :Cannot join channel (+l)\r\n";
+    sendErrorToClient(err, client);
+}
+
+void ERR_INVITEONLYCHAN(Client& client, std::string channel)
+{
+    std::string err = ":server 473 " + client.getNick() + " " + channel + " :Cannot join channel (+i)\r\n";
+    sendErrorToClient(err, client);
+}
+
+void ERR_BADCHANNELKEY(Client& client, std::string channel)
+{
+    std::string err = ":server 475 " + client.getNick() + " " + channel + " :Cannot join channel (+k)\r\n";
+    sendErrorToClient(err, client);
+}

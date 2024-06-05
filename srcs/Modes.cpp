@@ -1,5 +1,5 @@
 #include "../includes/Channel.hpp"
-
+#include "../includes/Error.hpp"
 void Channel::deleteOperator(std::string target)
 {
     std::vector<Client*>::iterator it;
@@ -88,13 +88,7 @@ void Channel::delModes(char mode, Client& from, std::string target)
 
 void Channel::changeMode(char addOrDel, char mode, Client& from, std::string target)
 {
-    bool findClientInOperator = false;
-    for (size_t i = 0; i < _operators.size(); i++)
-    {
-        if (*_operators[i] == from)
-            findClientInOperator = true;
-    }
-
+    bool findClientInOperator = checkOperator(from);
     if (!findClientInOperator)
     {
         std::cout << "Client is not an operator" << std::endl;
@@ -106,4 +100,54 @@ void Channel::changeMode(char addOrDel, char mode, Client& from, std::string tar
     }
     else
        delModes(mode, from, target);
+}
+
+void    Server::splitForMode(const std::string &buff, int fdSender)
+{
+    std::string target;
+    std::string data = buff.substr(buff.find("MODE") + 5); // TODO : Split et enlever le premier
+    std::vector<std::string> datas = split(data, ' ');
+    Client from;
+    try {
+        from = findClientWithFd(fdSender);
+    }
+    catch (std::runtime_error& e)
+    {
+        std::cerr << e.what() << std::endl;
+        return;
+    }
+    if (datas.size() < 2)
+    {
+        return ERR_NEEDMOREPARAMS(from);
+    }
+    if (datas.size() == 3)
+    {
+        target = datas[2];
+    }
+    std::string channel = datas[0];
+    std::string what = datas[1];
+
+    if (!from.getPass())
+        errorPassword(from);
+    if (what.find('-') == std::string::npos && what.find('+') == std::string::npos)
+    {
+        std::cerr << "Add - or + before the channel operator";
+        return ;
+    }
+    for (size_t i = 0; i < this->_vecChannel.size(); i++)
+    {
+        std::cout << GREEN << channel << ". " << _vecChannel[i].getName() << "." << RESET << std::endl;
+        if (channel == _vecChannel[i].getName())
+        {
+            Channel chan = _vecChannel[i];
+            char addOrDel = what[0];
+            char mode = what[1];
+            if (target.empty())
+            {
+                chan.changeMode(addOrDel, mode, from, "");
+            }
+            else
+                chan.changeMode(addOrDel, mode, from, target);
+        }
+    }
 }
