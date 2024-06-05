@@ -214,7 +214,6 @@ void	Server::readReceivedData(int fd)
             {
                 if (splittedBuffer[i].find('\r') != std::string::npos)
                     splittedBuffer[i].erase(splittedBuffer[i].find('\r'), 1);
-                //splittedBuffer[i] += "\r\n";
                 operatorCanals(splittedBuffer[i].c_str(), fd);
             }
             splittedBuffer.erase(splittedBuffer.begin(), splittedBuffer.end());
@@ -223,11 +222,9 @@ void	Server::readReceivedData(int fd)
 }
 
 //===================NICK===========================
-bool    Server::attributeNickName(int fd, const char *buffer)
+void    Server::attributeNickName(int fd, const char *buffer)
 {
     std::string find;
-    size_t nickPos;
-    size_t endLinePos;
     find = static_cast<std::string>(buffer);
     if (find.find("NICK") != std::string::npos)
     {
@@ -235,22 +232,13 @@ bool    Server::attributeNickName(int fd, const char *buffer)
         {
             if (_vecClient[i].getFdClient() == fd)
             {
-                nickPos = find.find("NICK");
-                nickPos += 5;
-                endLinePos = find.find('\n', nickPos);
-                if (endLinePos == std::string::npos)
-                    endLinePos = find.length();
-                std::string newNick = find.substr(nickPos, endLinePos - nickPos);
-                if (newNick.find(13) != std::string::npos)
-                    newNick = newNick.substr(0, newNick.size() - 1);
+                std::string newNick = find.substr(find.find("NICK") + 5);
                 _vecClient[i].setNick(newNick);
                 std::cout << "The nick is : " << _vecClient[i].getNick() << std::endl;
-                break;
+                return ;
             }
         }
-        return true;
     }
-    return false;
 }
 //==================================================
 
@@ -264,22 +252,10 @@ void    Server::checkPass(const std::string &buff, int fdClient)
         std::cout << "Error with command PASS, no \'PASS\'\n";
         return;
     }
-    size_t passEnd = buff.find('\n', passWord);
-    if (passEnd == std::string::npos)
-    {
-        std::cout << "Error with command PASS, no \'\\n\'\n";
-        return;
-    }
-    std::string passIn = buff.substr(passWord + 5, passEnd - passWord - 5);
-    if (!passIn.empty() && passIn[passIn.size() - 1] == '\r')
-    {
-        passIn.erase(passIn.size() - 1);
-    }
+    std::string passIn = buff.substr(passWord + 5);
     if (passIn != rightPass)
     {
         errorPassword(findClientWithFd(fdClient));
-//        close(fdClient);
-//        clearClient(fdClient);
     }
     else {
         std::cout << "PASS CORRECT\n";
@@ -334,7 +310,6 @@ void    Server::splitForPrivMsg(const std::string &buff, int fdSender)
             std::cerr << e.what() << std::endl;
             throw std::exception(); //A changer
         }
-        std::cout << from.getPass() << std::endl;
         if (!from.getPass())
         {
             errorPassword(from);
@@ -346,6 +321,7 @@ void    Server::splitForPrivMsg(const std::string &buff, int fdSender)
         }
         sendmsg(from.getNick(), to, message);
     }
+    // TODO : ERR_NEEDMOREPARAMETERS
 }
 //====================================================
 //=======================MODE=========================
@@ -354,9 +330,9 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
     std::string target;
     std::string data = buff.substr(buff.find("MODE") + 5);
     std::vector<std::string> datas = split(data, ' ');
-    if (datas.size() == 1)
+    if (datas.size() < 2)
     {
-        //peut etre afficher un message
+        //TODO : ERR_NEEDMOREPARAMETERS
         return ;
     }
     if (datas.size() == 3)
@@ -376,7 +352,6 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
     }
     if (!from.getPass())
         errorPassword(from);
-    std::cout << "channel :" <<  channel << "modes : " << what << std::endl;
     if (what.find('-') == std::string::npos && what.find('+') == std::string::npos)
     {
         std::cerr << "Add - or + before the channel operator";

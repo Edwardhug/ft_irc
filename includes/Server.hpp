@@ -44,7 +44,7 @@ public:
 	void removeClient(int fd);
     void operatorCanals(const char *buffer, int fdSender);
     void sendmsg(const std::string &from, const std::string &to, const std::string& message);
-    bool attributeNickName(int fd, const char *buffer);
+    void attributeNickName(int fd, const char *buffer);
     void splitForPrivMsg(const std::string &buff, int fdSender);
     void splitForMode(const std::string &buff, int fdSender);
 	void splitForJoin(std::string buff, int fdSender);
