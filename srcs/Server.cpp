@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include "../includes/lib.hpp"
+#include "../includes/Error.hpp"
 
 Server::Server(int port, std::string password) : _port(port), _password(password)
 {
@@ -207,7 +208,6 @@ void	Server::readReceivedData(int fd)
         completeBuffer += buffer;
         if (completeBuffer.find('\n') != std::string::npos)
         {
-            std::cout << "begin : \n" << completeBuffer << "\n end\n";
             std::vector<std::string> splittedBuffer = splitBuffer(completeBuffer, '\n');
             completeBuffer.erase();
             for (size_t i = 0; i < splittedBuffer.size(); i++)
@@ -330,17 +330,6 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
     std::string target;
     std::string data = buff.substr(buff.find("MODE") + 5);
     std::vector<std::string> datas = split(data, ' ');
-    if (datas.size() < 2)
-    {
-        //TODO : ERR_NEEDMOREPARAMETERS
-        return ;
-    }
-    if (datas.size() == 3)
-    {
-        target = datas[2];
-    }
-    std::string channel = datas[0];
-    std::string what = datas[1];
     Client from;
     try {
         from = findClientWithFd(fdSender);
@@ -350,6 +339,17 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
         std::cerr << e.what() << std::endl;
         return;
     }
+    if (datas.size() < 2)
+    {
+        return ERR_NEEDMOREPARAMS(from);
+    }
+    if (datas.size() == 3)
+    {
+        target = datas[2];
+    }
+    std::string channel = datas[0];
+    std::string what = datas[1];
+
     if (!from.getPass())
         errorPassword(from);
     if (what.find('-') == std::string::npos && what.find('+') == std::string::npos)
@@ -364,7 +364,9 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
             char addOrDel = what[0];
             char mode = what[1];
             if (target.empty())
-                _vecChannel[i].changeMode(addOrDel, mode, from, NULL);
+            {
+                _vecChannel[i].changeMode(addOrDel, mode, from, "");
+            }
             else
                 _vecChannel[i].changeMode(addOrDel, mode, from, target);
         }

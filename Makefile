@@ -11,12 +11,15 @@ SRCS =	main.cpp \
 		Modes.cpp \
 		Invite.cpp \
 		Topic.cpp \
-		Join.cpp
+		Join.cpp \
+		Error.cpp \
 
 INCLUDE =	lib.hpp \
 			Client.hpp \
 			Server.hpp \
-			Channel.hpp 
+			Channel.hpp \
+			Error.hpp \
+
 OBJS = $(SRCS:%.cpp=$(PATH_OBJS)%.o)
 
 PATH_SRCS = srcs/

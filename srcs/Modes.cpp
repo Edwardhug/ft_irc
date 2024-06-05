@@ -94,13 +94,16 @@ void Channel::changeMode(char addOrDel, char mode, Client& from, std::string tar
         if (*_operators[i] == from)
             findClientInOperator = true;
     }
+
     if (!findClientInOperator)
     {
         std::cout << "Client is not an operator" << std::endl;
         return ;
     }
     if (addOrDel == '+')
+    {
         addModes(mode, from, target);
+    }
     else
        delModes(mode, from, target);
 }

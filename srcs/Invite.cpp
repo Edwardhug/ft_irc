@@ -1,16 +1,13 @@
 #include "../includes/Server.hpp"
-
+#include "../includes/Error.hpp"
 void Server::inviteClient(std::string &buff, int fdSender)
 {
     std::string data = buff.substr(buff.find("INVITE") + 7);
     Client from = findClientWithFd(fdSender);
-    std::cout << "data : " << data << std::endl;
     std::vector<std::string> datas = split(data, ' ');
     if (datas.size() < 2)
     {
-        std::string err = ":server 461 " + from.getNick() + " INVITE :Not enough parameters";
-        servSendMessageToClient(err, from);
-        return ;
+        return ERR_NEEDMOREPARAMS(from);
     }
     std::string newClientNick = datas[0];
     std::string channel = datas[1];
@@ -25,22 +22,15 @@ void Server::inviteClient(std::string &buff, int fdSender)
     }
     if (chToFind == NULL)
     {
-        std::string err = ":server 403 " + from.getNick() + " " + channel + " :No such channel\r\n";
-        servSendMessageToClient(err, from);
-        return;
+        return ERR_NOSUCHCHANNEL(from, channel);
     }
     if (!chToFind->clientInChannel(from))
     {
-        std::string err = ":server 442 " + from.getNick() + " " + channel + " :You're not on that channel\r\n";
-        servSendMessageToClient(err, from);
-        return ;
+        return ERR_NOTONCHANNEL(from, channel);
     }
-    // TODO : Tester plus, ca n'a pas l'air de marcher
     if (chToFind->checkPerm('i') && !chToFind->checkOperator(from))
     {
-        std::string err = ":server 482 " + from.getNick() + " " + channel + " :You're not channel operator\r\n";
-        servSendMessageToClient(err, from);
-        return ;
+        return ERR_CHANOPRIVSNEEDED(from, channel);
     }
     Client *newClient = NULL;
     for (size_t i = 0; i < _vecClient.size(); i++)
@@ -53,15 +43,11 @@ void Server::inviteClient(std::string &buff, int fdSender)
     }
     if (newClient == NULL)
     {
-        std::string err = ":server 403 " + from.getNick() + " " + newClientNick + " :No such client\r\n";
-        servSendMessageToClient(err, from);
-        return ;
+        return ERR_WASNOSUCHNICK(from, newClientNick);
     }
     if (chToFind->clientInChannel(*newClient))
     {
-        std::string err = ":server 443 " + from.getNick() + " " + newClientNick + " " + channel + " :Is already on channel\r\n";
-        servSendMessageToClient(err, from);
-        return ;
+        return ERR_USERONCHANNEL(from, newClientNick, channel);
     }
     chToFind->addClient(newClient);
     // TODO : TROUVER COMMENT FIX, message pas complet
