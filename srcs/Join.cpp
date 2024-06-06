@@ -3,6 +3,7 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include "../includes/lib.hpp"
+#include "../includes/Error.hpp"
 #include <cstdio>
 #include <cstring>
 #include "../includes/Error.hpp"
@@ -87,8 +88,31 @@ Channel &Server::findChannelWithName(std::string name) {
 
 bool isValidName(std::string name) {
     if (name[5] != '#') {
-        std::cout << RED << "Error: Invalid channel name. Channel name must start with #." << RESET << std::endl;
         return false;
+    }
+    return true;
+}
+
+bool    Channel::checkModesForJoin(Client& client)
+{
+    std::map<char, bool>::iterator it;
+    it = _modes.find('i');
+    if (it->second)
+    {
+        if (!clientIsInvited(client))
+        {
+            ERR_INVITEONLYCHAN(client, _name);
+            return false;
+        }
+    }
+    it = _modes.find('l');
+    if (it->second)
+    {
+        if (_clients.size() == _maxClient)
+        {
+            ERR_CHANNELISFULL(client, _name);
+            return false;
+        }
     }
     return true;
 }
@@ -96,30 +120,47 @@ bool isValidName(std::string name) {
 void	Server::splitForJoin(std::string buff, int fdSender)
 {
     if (isValidName(buff) == false) {
-        return;}
+        return;
+    }
 	std::vector<std::string> data;
-	Client &client = findClientWithFd(fdSender);
+	Client *client;
+    try
+    {
+        client = &findClientWithFd(fdSender);
+    }
+    catch (std::runtime_error& e)
+    {
+        std::cout << e.what() << std::endl;
+        return ;
+    }
     data = split(buff, ' ');
+    if (data.size() < 2)
+    {
+        return ERR_NEEDMOREPARAMS(*client, "JOIN");
+    }
 	if (data.size() >= 2 && channelExist(data[1]) == false)
     {
-//        if (data[1].find("\r") != std::string::npos && data[1].find("\n") != std::string::npos)
-//        {
-//            std::cout << data[1] << " " << data[1].size() << std::endl;
-//            data[1].resize(data[1].size() - 1);
-//        }
-		Channel newChannel(data[1], &client);
+		Channel newChannel(data[1], client);
 		addChannel(newChannel);
-		client.changeChannelBool(true);
-		client.setChannel(findChannelWithName(data[1]));
-		sendConfirmation(data, client);
+		client->changeChannelBool(true);
+		client->setChannel(findChannelWithName(data[1]));
+		sendConfirmation(data, *client);
 	}
 	else if (data.size() >= 2 && channelExist(data[1]) == true) {
-//        if (data[1].find("\r") != std::string::npos && data[1].find("\n") != std::string::npos)
-//            data[1].resize(data[1].size() -1);
-		addClientToChannel(data[1], client);
-		client.changeChannelBool(true);
-		client.setChannel(findChannelWithName(data[1]));
-		sendConfirmation(data, client);
+        Channel& channel = findChannelWithName(data[1]);
+        if (!channel.checkModesForJoin(*client))
+            return ;
+        if (channel.checkPerm('k'))
+        {
+            if (data.size() < 3)
+                return ERR_BADCHANNELKEY(*client, data[1]);
+            if (data[2] != channel.getPass())
+                return ERR_BADCHANNELKEY(*client, data[1]);
+        }
+		addClientToChannel(data[1], *client);
+		client->changeChannelBool(true);
+		client->setChannel(findChannelWithName(data[1]));
+		sendConfirmation(data, *client);
 	}
 }
 //==============================channel msg=============================

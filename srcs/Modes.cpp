@@ -1,4 +1,24 @@
 #include "../includes/Channel.hpp"
+#include "../includes/Error.hpp"
+
+std::string getModesActivate(std::map<char, bool>& modes, unsigned int maxClient)
+{
+    std::map<char, bool>::iterator it;
+    std::string res = "+";
+    for (it = modes.begin(); it != modes.end(); it++)
+    {
+        if (it->second)
+            res += it->first;
+    }
+    if (modes['l'])
+    {
+        std::ostringstream oss;
+        oss << maxClient;
+        res += " " + oss.str();
+    }
+    return res;
+}
+
 
 void Channel::deleteOperator(std::string target)
 {
@@ -15,6 +35,7 @@ void Channel::deleteOperator(std::string target)
 
 void Channel::addOperator(std::string target)
 {
+    //TODO: verifier qu'il n'est pas deja operateur
     for (size_t i = 0; i < _clients.size(); i++)
     {
         if (_clients[i]->getNick() == target)
@@ -27,17 +48,17 @@ void Channel::addOperator(std::string target)
 
 void    Channel::addModes(char mode, Client& from, std::string target)
 {
-    std::map<char, bool>::iterator it;
-    it = _modes.find(mode);
     if (mode == 'o' && !target.empty())
     {
         addOperator(target);
     }
+    std::map<char, bool>::iterator it;
+    it = _modes.find(mode);
     if (it->second)
         std::cout << _name << ": " << "mode " << mode << " is already activate." << std::endl; //Envoyer message au client
     else
     {
-        it->second = true;
+        _modes[mode] = true;
         if (mode == 'k')
         {
             if (target.empty())
@@ -88,13 +109,7 @@ void Channel::delModes(char mode, Client& from, std::string target)
 
 void Channel::changeMode(char addOrDel, char mode, Client& from, std::string target)
 {
-    bool findClientInOperator = false;
-    for (size_t i = 0; i < _operators.size(); i++)
-    {
-        if (*_operators[i] == from)
-            findClientInOperator = true;
-    }
-
+    bool findClientInOperator = checkOperator(from);
     if (!findClientInOperator)
     {
         std::cout << "Client is not an operator" << std::endl;
@@ -107,3 +122,54 @@ void Channel::changeMode(char addOrDel, char mode, Client& from, std::string tar
     else
        delModes(mode, from, target);
 }
+
+void    Server::splitForMode(const std::string &buff, int fdSender)
+{
+    std::string target;
+    std::string data = buff.substr(buff.find("MODE") + 5); // TODO : Split et enlever le premier
+    std::vector<std::string> datas = split(data, ' ');
+    Client *from;
+    try {
+        from = &findClientWithFd(fdSender);
+    }
+    catch (std::runtime_error& e)
+    {
+        std::cerr << e.what() << std::endl;
+        return;
+    }
+    if (datas.size() < 2)
+    {
+       // RPL_CHANNELMODEIS(*from, datas[0], getModesActivat)
+        return ;
+        //ERR_NEEDMOREPARAMS(*from, "MODE");
+    }
+    if (datas.size() == 3)
+    {
+        target = datas[2];
+    }
+    std::string channel = datas[0];
+    std::string what = datas[1];
+    if (!from->getPass())
+        errorPassword(*from);
+    if (what.find('-') == std::string::npos && what.find('+') == std::string::npos)
+    {
+        std::cerr << "Add - or + before the channel operator";
+        return ;
+    }
+    for (size_t i = 0; i < this->_vecChannel.size(); i++)
+    {
+        if (channel == _vecChannel[i].getName())
+        {
+            Channel& chan = _vecChannel[i];
+            char addOrDel = what[0];
+            char mode = what[1];
+            if (target.empty())
+            {
+                chan.changeMode(addOrDel, mode, *from, "");
+            }
+            else
+                chan.changeMode(addOrDel, mode, *from, target);
+            break ;
+        }
+    }
+} 

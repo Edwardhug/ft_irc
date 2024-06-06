@@ -16,9 +16,10 @@ class Channel {
     std::string _topic;
     std::vector<Client*> _clients;
     std::vector<Client*> _operators;
+    std::vector<Client*> _clientsInvited;
     std::map<char, bool> _modes;
     std::string _password;
-    int _maxClient;
+    unsigned int _maxClient;
 
     public:
 	Channel();
@@ -38,6 +39,12 @@ class Channel {
     void delModes(char mode, Client& from, std::string target);
     bool clientInChannel(Client &toFind);
     void removeClient(Client &toRemove);
+    void addClientInvited(Client* newClient);
+    bool clientIsInvited(Client& client);
+    std::string getPass();
+    bool checkModesForJoin(Client& client);
+
+    void displayFDS();
 };
 
 #endif

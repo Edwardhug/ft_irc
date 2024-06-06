@@ -11,6 +11,7 @@ Channel::Channel(std::string name, Client *creator)
     this->_modes.insert(std::pair<char, bool>('t', true));
     this->_modes.insert(std::pair<char, bool>('k', false));
     this->_modes.insert(std::pair<char, bool>('l', false));
+    this->_maxClient = 0;
 }
 
 Channel::~Channel() {}
@@ -24,6 +25,10 @@ void	Channel::addClient(Client *newClient) {
 	_clients.push_back(newClient);
 }
 
+void    Channel::addClientInvited(Client *newClient)
+{
+    _clientsInvited.push_back(newClient);
+}
 
 std::vector<Client*> Channel::getVecClient() {
 	return (_clients);
@@ -71,7 +76,7 @@ bool Channel::clientInChannel(Client &toFind)
     }
     return false;
 }
- 
+
 void    Channel::removeClient(Client &toRemove)
 {
     for (size_t i = 0; i < _clients.size(); i++)
@@ -81,5 +86,28 @@ void    Channel::removeClient(Client &toRemove)
             _clients.erase(_clients.begin() + i);
             return;
         }
+    }
+}
+
+bool Channel::clientIsInvited(Client &client)
+{
+    for (size_t i = 0; i < _clientsInvited.size(); i++)
+    {
+        if (*_clientsInvited[i] == client)
+            return true;
+    }
+    return false;
+}
+
+std::string Channel::getPass()
+{
+    return _password;
+}
+
+void Channel::displayFDS()
+{
+    for (size_t i = 0; i < _operators.size(); i++)
+    {
+        std::cout << RED << _operators[i]->getFdClient() << RESET << std::endl;
     }
 }

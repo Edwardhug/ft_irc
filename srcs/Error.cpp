@@ -11,9 +11,9 @@ void ERR_NOSUCHCHANNEL(Client& client, std::string channel)
     sendErrorToClient(err, client);
 }
 
-void ERR_NEEDMOREPARAMS(Client& client)
+void ERR_NEEDMOREPARAMS(Client& client, std::string fx)
 {
-    std::string err = ":server 461 " + client.getNick() + " INVITE :Not enough parameters\r\n";
+    std::string err = ":server 461 " + client.getNick() + " " + fx + " :Not enough parameters\r\n";
     sendErrorToClient(err, client);
 }
 
@@ -38,4 +38,40 @@ void ERR_WASNOSUCHNICK(Client& client, std::string nick)
 {
     std::string err = ":server 406 " + client.getNick() + " " + nick + " :There was no such nickname\r\n";
     sendErrorToClient(err, client);
+}
+
+void ERR_PASSWDISMATCH(Client& client)
+{
+    std::string err = ":server 464 " + client.getNick() + " :Password incorrect\r\n";
+    sendErrorToClient(err, client);
+}
+
+void ERR_CHANNELISFULL(Client& client, std::string channel)
+{
+    std::string err = ":server 471 " + client.getNick() + " " + channel + " :Cannot join channel (+l)\r\n";
+    sendErrorToClient(err, client);
+}
+
+void ERR_INVITEONLYCHAN(Client& client, std::string channel)
+{
+    std::string err = ":server 473 " + client.getNick() + " " + channel + " :Cannot join channel (+i)\r\n";
+    sendErrorToClient(err, client);
+}
+
+void ERR_BADCHANNELKEY(Client& client, std::string channel)
+{
+    std::string err = ":server 475 " + client.getNick() + " " + channel + " :Cannot join channel (+k)\r\n";
+    sendErrorToClient(err, client);
+}
+
+void RPL_INVITING(Client& from, Client& to, std::string channel)
+{
+    std::string reply = ":" + from.getNick() + " 341 " + to.getNick() + " " + channel + "\r\n";
+    sendErrorToClient(reply, from);
+    sendErrorToClient(reply, to);
+}
+
+void RPL_CHANNELMODEIS(Client& client, std::string channel, std::string modes)
+{
+    std::string reply = ":server 324 " + client.getNick() + " " + channel + " " + modes;
 }
