@@ -24,7 +24,6 @@ void    Server::sendMessageToChannel(std::string channelName, std::string messag
 }
 
 void	Server::sendConfirmation(std::vector<std::string> data, Client &client) {
-    std::cout << GREEN << data[1] << RESET << std::endl;
 	std::string joinMsg = ":" + client.getNick() + " JOIN " + data[1] + "\r\n";
     sendMessageToChannel(data[1], joinMsg);
     // send(client.getFdClient(), joinMsg.c_str(), joinMsg.length(), 0);
@@ -32,9 +31,22 @@ void	Server::sendConfirmation(std::vector<std::string> data, Client &client) {
     std::string topicMsg = ":server 332 " + client.getNick() + " " + data[1] + " :Welcome to the new channel " + data[1] + "\r\n";
     send(client.getFdClient(), topicMsg.c_str(), topicMsg.length(), 0);
     // Envoyer la liste des utilisateurs (353)
-    std::string namesMsg = ":server 353 " + client.getNick() + " = " + data[1] + " :" + client.getNick() + "\r\n";
-    send(client.getFdClient(), namesMsg.c_str(), namesMsg.length(), 0);
+    // std::string namesMsg = ":server 353 " + client.getNick() + " = " + data[1] + " :" + client.getNick() + "\r\n";
+    // send(client.getFdClient(), namesMsg.c_str(), namesMsg.length(), 0);
     // Envoyer la fin de la liste des utilisateurs (366)
+    std::string nameList = ":server 353 " + client.getNick() + " = " + data[1] + " :";
+    for (size_t i = 0; i < _vecChannel.size(); ++i) {
+        if (_vecChannel[i].getName() == data[1]) {
+            std::vector<Client*> vecClient = _vecChannel[i].getVecClient();
+            for (size_t j = 0; j < vecClient.size(); ++j) {
+                nameList += vecClient[j]->getNick() + " ";
+            }
+            nameList += "\r\n";
+            std::cout << GREEN << nameList << RESET << std::endl;
+            send(client.getFdClient(), nameList.c_str(), nameList.length(), 0);
+            break;
+        }
+    }
     std::string endOfNamesMsg = ":server 366 " + client.getNick() + " " + data[1] + " :End of /NAMES list\r\n";
     send(client.getFdClient(), endOfNamesMsg.c_str(), endOfNamesMsg.length(), 0);
 }
