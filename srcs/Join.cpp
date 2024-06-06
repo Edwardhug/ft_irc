@@ -24,17 +24,11 @@ void    Server::sendMessageToChannel(std::string channelName, std::string messag
 }
 
 void	Server::sendConfirmation(std::vector<std::string> data, Client &client) {
-	std::string joinMsg = ":" + client.getNick() + " JOIN " + data[1] + "\r\n";
+	std::string joinMsg = ":" + client.getNick() + " JOIN " + data[1] + "\r\n"; // envoie au nouveau client le message de join et ajoute le client au channel
     sendMessageToChannel(data[1], joinMsg);
-    // send(client.getFdClient(), joinMsg.c_str(), joinMsg.length(), 0);
-    // Envoyer le sujet du canal (332)
     std::string topicMsg = ":server 332 " + client.getNick() + " " + data[1] + " :Welcome to the new channel " + data[1] + "\r\n";
-    send(client.getFdClient(), topicMsg.c_str(), topicMsg.length(), 0);
-    // Envoyer la liste des utilisateurs (353)
-    // std::string namesMsg = ":server 353 " + client.getNick() + " = " + data[1] + " :" + client.getNick() + "\r\n";
-    // send(client.getFdClient(), namesMsg.c_str(), namesMsg.length(), 0);
-    // Envoyer la fin de la liste des utilisateurs (366)
-    std::string nameList = ":server 353 " + client.getNick() + " = " + data[1] + " :";
+    send(client.getFdClient(), topicMsg.c_str(), topicMsg.length(), 0); 
+    std::string nameList = ":server 353 " + client.getNick() + " = " + data[1] + " :"; // envoie au client la liste des noms des clients dans le channel
     for (size_t i = 0; i < _vecChannel.size(); ++i) {
         if (_vecChannel[i].getName() == data[1]) {
             std::vector<Client*> vecClient = _vecChannel[i].getVecClient();
