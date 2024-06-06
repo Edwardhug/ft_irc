@@ -11,6 +11,7 @@ Channel::Channel(std::string name, Client *creator)
     this->_modes.insert(std::pair<char, bool>('t', true));
     this->_modes.insert(std::pair<char, bool>('k', false));
     this->_modes.insert(std::pair<char, bool>('l', false));
+    this->_maxClient = 0;
 }
 
 Channel::~Channel() {}
@@ -54,7 +55,6 @@ bool Channel::checkOperator(Client &client)
 {
     for (size_t i = 0; i < _operators.size(); i++)
     {
-        std::cout << client.getFdClient() << " " << (*_operators[i]).getFdClient() << std::endl;
         if (*_operators[i] == client)
             return true;
     }

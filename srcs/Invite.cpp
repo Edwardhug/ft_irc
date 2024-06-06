@@ -2,12 +2,14 @@
 #include "../includes/Error.hpp"
 void Server::inviteClient(std::string &buff, int fdSender)
 {
+    std::cout << GREEN << buff << RESET << std::endl;
     std::string data = buff.substr(buff.find("INVITE") + 7);
     Client from = findClientWithFd(fdSender);
     std::vector<std::string> datas = split(data, ' ');
+    std::cout << RED << datas.size() << RESET << std::endl;
     if (datas.size() < 2)
     {
-        return ERR_NEEDMOREPARAMS(from);
+        return ERR_NEEDMOREPARAMS(from, "INVITE");
     }
     std::string newClientNick = datas[0];
     std::string channel = datas[1];
@@ -50,9 +52,10 @@ void Server::inviteClient(std::string &buff, int fdSender)
         return ERR_USERONCHANNEL(from, newClientNick, channel);
     }
     chToFind->addClientInvited(newClient);
+    RPL_INVITING(from, *newClient, channel);
     // TODO : TROUVER COMMENT FIX, message pas complet
-    std::string rlpInviting = ":server 341 " + from.getNick() + " " + newClientNick + " " + channel + "\r\n";
-    servSendMessageToClient(rlpInviting, from);
+    //std::string rlpInviting = ":server 341 " + from.getNick() + " " + newClientNick + " " + channel + "\r\n";
+    //servSendMessageToClient(rlpInviting, from);
     //TODO : RPL_INVITING
 }
 

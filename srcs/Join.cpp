@@ -60,7 +60,6 @@ Channel &Server::findChannelWithName(std::string name) {
 
 bool isValidName(std::string name) {
     if (name[5] != '#') {
-        std::cout << RED << "Error: Invalid channel name. Channel name must start with #." << RESET << std::endl;
         return false;
     }
     return true;
@@ -70,10 +69,8 @@ bool    Channel::checkModesForJoin(Client& client)
 {
     std::map<char, bool>::iterator it;
     it = _modes.find('i');
-    std::cout << RED << it->second << RESET << std::endl;
     if (it->second)
     {
-        std::cout << RED << "je passe ici \n" << RESET;
         if (!clientIsInvited(client))
         {
             ERR_INVITEONLYCHAN(client, _name);
@@ -98,10 +95,10 @@ void	Server::splitForJoin(std::string buff, int fdSender)
         return;
     }
 	std::vector<std::string> data;
-	Client client;
+	Client *client;
     try
     {
-        client = findClientWithFd(fdSender);
+        client = &findClientWithFd(fdSender);
     }
     catch (std::runtime_error& e)
     {
@@ -111,31 +108,31 @@ void	Server::splitForJoin(std::string buff, int fdSender)
     data = split(buff, ' ');
     if (data.size() < 2)
     {
-        return ERR_NEEDMOREPARAMS(client);
+        return ERR_NEEDMOREPARAMS(*client, "JOIN");
     }
 	if (data.size() >= 2 && channelExist(data[1]) == false)
     {
-        std::cout << GREEN << "je passe ici \n" << RESET;
-		Channel newChannel(data[1], &client);
+		Channel newChannel(data[1], client);
 		addChannel(newChannel);
-		client.changeChannelBool(true);
-		client.setChannel(findChannelWithName(data[1]));
-		sendConfirmation(data, client);
+		client->changeChannelBool(true);
+		client->setChannel(findChannelWithName(data[1]));
+		sendConfirmation(data, *client);
 	}
 	else if (data.size() >= 2 && channelExist(data[1]) == true) {
         Channel& channel = findChannelWithName(data[1]);
-        channel.checkModesForJoin(client);
+        if (!channel.checkModesForJoin(*client))
+            return ;
         if (channel.checkPerm('k'))
         {
             if (data.size() < 3)
-                return ERR_BADCHANNELKEY(client, data[1]);
+                return ERR_BADCHANNELKEY(*client, data[1]);
             if (data[2] != channel.getPass())
-                return ERR_BADCHANNELKEY(client, data[1]);
+                return ERR_BADCHANNELKEY(*client, data[1]);
         }
-		addClientToChannel(data[1], client);
-		client.changeChannelBool(true);
-		client.setChannel(findChannelWithName(data[1]));
-		sendConfirmation(data, client);
+		addClientToChannel(data[1], *client);
+		client->changeChannelBool(true);
+		client->setChannel(findChannelWithName(data[1]));
+		sendConfirmation(data, *client);
 	}
 }
 //==============================channel msg=============================
