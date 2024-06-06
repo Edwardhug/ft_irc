@@ -38,4 +38,3 @@ void	Server::kickClient(std::string &buff, int fdSender) {
 	servSendMessageToClient(message, client);
 	servSendMessageToClient(message, clientToKick);
 }
-
