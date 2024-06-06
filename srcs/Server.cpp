@@ -79,11 +79,6 @@ void Server::servSendMessageToClient(const std::string &message, Client &client)
     send(client.getFdClient(), message.c_str(), message.length(), 0);
 }
 
-void Server::errorPassword(Client& client)
-{
-    servSendMessageToClient(":server 464 " + client.getNick() + " :Password incorrect\r\n", client);
-}
-
 void Server::servInit() {
     sockaddr_in data_sock;
     pollfd newPoll;
@@ -158,32 +153,6 @@ void	Server::addNewClient() {
 	std::cout << "new client added" << std::endl;
 }
 
-Client&	Server::findClientWithNick(const std::string &nick)
-{
-	size_t i;
-    for (i = 0; i < _vecClient.size(); i++)
-    {
-        if (_vecClient[i].getNick() == nick)
-        {
-            return _vecClient[i];
-        }
-    }
-	throw std::runtime_error("Client not found with the nick");
-}
-
-Client& Server::findClientWithFd(int fd)
-{
-	size_t i;
-    for (i = 0; i < _vecClient.size(); i++)
-    {
-        if (_vecClient[i].getFdClient() == fd)
-        {
-            return _vecClient[i];
-        }
-    }
-	throw std::runtime_error("Client not found with the fd");
-}
-
 void	Server::readReceivedData(int fd)
 {
     static std::string completeBuffer;
@@ -241,94 +210,7 @@ void    Server::attributeNickName(int fd, const char *buffer)
         }
     }
 }
-//==================================================
 
-//===================PASS===========================
-void    Server::checkPass(const std::string &buff, int fdClient)
-{
-    std::string rightPass = this->_password;
-    size_t passWord = buff.find("PASS ");
-    Client from;
-    try
-    {
-        from = findClientWithFd(fdClient);
-    }
-    catch (std::runtime_error& e)
-    {
-        std::cout << e.what() << std::endl;
-        return ;
-    }
-    std::string passIn = buff.substr(passWord + 5);
-    if (passIn != rightPass)
-    {
-        return ERR_PASSWDISMATCH(from);
-    }
-    else {
-        std::cout << "PASS CORRECT\n";
-        for (size_t i = 0; i < _vecClient.size(); i++)
-        {
-            if (fdClient == _vecClient[i].getFdClient())
-            {
-                _vecClient[i].setPass();
-            }
-        }
-    }
-}
-//==================================================
-
-//===================PRIVMSG========================
-void    Server::sendmsg(const std::string &from, const std::string &to, const std::string& message) // il n'affiche pas qui a envoyer le message
-{
-    int fd;
-    try {
-        fd = findClientWithNick(to).getFdClient();
-    }
-    catch (const std::runtime_error& e)
-    {
-        std::cerr << e.what() << std::endl;
-        return ;
-    }
-    std::string completeMessage = ":" + from + " PRIVMSG " + to + " :" + message + "\r\n";
-    ssize_t bytesSend;
-    bytesSend = send(fd, completeMessage.c_str(), completeMessage.length(), 0);// peut etre changer les flags
-    if (bytesSend == -1)
-    {
-        std::cout << "Error when send data for a PRIVMSG" << std::endl;
-        return ;
-    }
-}
-
-void    Server::splitForPrivMsg(const std::string &buff, int fdSender)
-{
-    std::vector<std::string> data;
-    data = split(buff, ' ');
-    Client from;
-    try {
-        from = findClientWithFd(fdSender);
-    }
-    catch (std::runtime_error& e)
-    {
-        std::cerr << e.what() << std::endl;
-        return ;
-    }
-    if (data.size() < 3)
-        return ERR_NEEDMOREPARAMS(from, "PRIVMSG");
-    {
-        std::string to = data[1];
-        std::string message = data[2];
-
-        if (!from.getPass())
-        {
-            errorPassword(from);
-            return;
-        }
-        if (!message.empty() && message[0] == ':')
-        {
-            message.erase(0, 1);
-        }
-        sendmsg(from.getNick(), to, message);
-    }
-}
 //====================================================
 void    Server::operatorCanals(const char *buffer, int fdSender) // A transformer en switch case ?
 {

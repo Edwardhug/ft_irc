@@ -8,7 +8,7 @@ void	Server::kickClient(std::string &buff, int fdSender) {
 	data = split(buff, ' ');
 	data = splitAllSpaces(buff);
 	if (data.size() < 3) {
-		return ERR_NEEDMOREPARAMS(client);
+		return ERR_NEEDMOREPARAMS(client, "KICK");
 	}
 	if (data[1][0] != '#') {
 		for (size_t i = 2; i < data.size(); i++) {

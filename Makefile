@@ -13,6 +13,9 @@ SRCS =	main.cpp \
 		Topic.cpp \
 		Join.cpp \
 		Kick.cpp \
+		PrivateMsg.cpp \
+		Password.cpp \
+		Find.cpp \
 		Error.cpp \
 
 INCLUDE =	lib.hpp \

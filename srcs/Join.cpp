@@ -75,17 +75,6 @@ void Server::addClientToChannel(std::string nameChannel, Client &client) {
 
 }
 
-Channel &Server::findChannelWithName(std::string name) {
-	size_t i;
-    for (i = 0; i < _vecChannel.size(); i++)
-    {
-        if (_vecChannel[i].getName() == name) {
-			return _vecChannel[i];
-		}
-    }
-	return _vecChannel[i]; // arrive jamais ici parce qu'on fait les check avant
-}
-
 bool isValidName(std::string name) {
     if (name[5] != '#') {
         return false;
