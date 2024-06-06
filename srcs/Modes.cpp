@@ -106,7 +106,7 @@ void    Channel::addModes(char mode, Client& from, std::string target)
             _maxClient = ft_atoi(target.c_str());
         }
         std::string notif = ":" + from.getNick() + " MODE " + _name + " +" + mode + "\r\n";
-        //channelMsg(notif.c_str(), from.getFdClient());
+        //channelMsg(notif.c_str(), from.getFdClient()); 
     }
 }
 
