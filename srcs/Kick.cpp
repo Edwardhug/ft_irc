@@ -1,15 +1,6 @@
 #include "../includes/Server.hpp"
 #include "../includes/Error.hpp"
-
-std::vector<std::string> splitAllSpaces(std::string &str) {
-	std::vector<std::string> data;
-	std::string word;
-	std::istringstream iss(str);
-	while (iss >> word) {
-		data.push_back(word);
-	}
-	return data;
-}
+#include "../includes/lib.hpp"
 
 void	Server::kickClient(std::string &buff, int fdSender) {
 	std::vector<std::string> data;

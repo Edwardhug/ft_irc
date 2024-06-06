@@ -1,5 +1,15 @@
 #include "lib.hpp"
 
+std::vector<std::string> splitAllSpaces(std::string &str) {
+	std::vector<std::string> data;
+	std::string word;
+	std::istringstream iss(str);
+	while (iss >> word) {
+		data.push_back(word);
+	}
+	return data;
+}
+
 std::vector<std::string> splitBuffer(const std::string& str, char delimiter) {
     std::vector<std::string> tokens;
     std::string token;

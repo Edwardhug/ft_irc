@@ -7,9 +7,27 @@
 #include <cstring>
 #include "../includes/Error.hpp"
 
+void    Server::sendMessageToChannel(std::string channelName, std::string message) {
+    Channel &channel = findChannelWithName(channelName);
+    std::vector<Client*> vecClient = channel.getVecClient();
+    for (size_t i = 0; i < vecClient.size(); ++i) {
+        int clientFd = vecClient[i]->getFdClient();
+        if (clientFd != -1) {
+            ssize_t bytesSent = send(clientFd, message.c_str(), message.length(), 0);
+            if (bytesSent == -1) {
+                std::cerr << RED << "Error when sending data to client " << vecClient[i]->getNick() << ": ";
+                perror("");
+                std::cerr << RESET;
+            }
+        }
+    }
+}
+
 void	Server::sendConfirmation(std::vector<std::string> data, Client &client) {
+    std::cout << GREEN << data[1] << RESET << std::endl;
 	std::string joinMsg = ":" + client.getNick() + " JOIN " + data[1] + "\r\n";
-    send(client.getFdClient(), joinMsg.c_str(), joinMsg.length(), 0);
+    sendMessageToChannel(data[1], joinMsg);
+    // send(client.getFdClient(), joinMsg.c_str(), joinMsg.length(), 0);
     // Envoyer le sujet du canal (332)
     std::string topicMsg = ":server 332 " + client.getNick() + " " + data[1] + " :Welcome to the new channel " + data[1] + "\r\n";
     send(client.getFdClient(), topicMsg.c_str(), topicMsg.length(), 0);
