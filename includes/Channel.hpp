@@ -30,7 +30,7 @@ class Channel {
     std::string getName() const;
 	std::vector<Client*> getVecClient();
     void deleteOperator(std::string target);
-    void addOperator(std::string target);
+    void addOperator(std::string target, Client& from);
     void setTopic(std::string topic);
     std::string getTopic();
     bool checkPerm(char mode);
@@ -45,6 +45,7 @@ class Channel {
     bool checkModesForJoin(Client& client);
 
     void displayFDS();
+    void channelMsg(std::string msg, int fdSender);
 };
 
 #endif

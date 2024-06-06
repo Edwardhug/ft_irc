@@ -33,14 +33,37 @@ void Channel::deleteOperator(std::string target)
     }
 }
 
-void Channel::addOperator(std::string target)
+void    Channel::channelMsg(std::string msg, int fdSender)
 {
+    for (size_t i = 0; i < _clients.size(); i++)
+    {
+            send(_clients[i]->getFdClient(), msg.c_str(), msg.size(), 0);
+    }
+    (void)fdSender;
+}
+
+std::string removeSpaces(std::string str)
+{
+    std::string res;
+    for (size_t i = 0; i < str.size(); i++)
+    {
+        if (str[i] != ' ')
+            res += str[i];
+    }
+    return res;
+}
+
+void Channel::addOperator(std::string target, Client& from)
+{
+    target = removeSpaces(target);
     //TODO: verifier qu'il n'est pas deja operateur
     for (size_t i = 0; i < _clients.size(); i++)
     {
         if (_clients[i]->getNick() == target)
         {
             _operators.push_back(_clients[i]);
+            std::string notif = ":" + from.getNick() + " MODE " + _name + " +o " + target + "\r\n";
+            channelMsg(notif, from.getFdClient());
             break ;
         }
     }
@@ -50,7 +73,7 @@ void    Channel::addModes(char mode, Client& from, std::string target)
 {
     if (mode == 'o' && !target.empty())
     {
-        addOperator(target);
+        addOperator(target, from);
     }
     std::map<char, bool>::iterator it;
     it = _modes.find(mode);

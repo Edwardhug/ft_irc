@@ -2,7 +2,6 @@
 #include "../includes/Error.hpp"
 void Server::inviteClient(std::string &buff, int fdSender)
 {
-    std::cout << GREEN << buff << RESET << std::endl;
     std::string data = buff.substr(buff.find("INVITE") + 7);
     Client from = findClientWithFd(fdSender);
     std::vector<std::string> datas = split(data, ' ');

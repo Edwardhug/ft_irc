@@ -175,7 +175,6 @@ void	Server::readReceivedData(int fd)
 	else {
 		buffer[bytes_received] = '\0';
         completeBuffer += buffer;
-        std::cout << GREEN << completeBuffer << "\n" << RESET;
         if (completeBuffer.find('\n') != std::string::npos)
         {
             std::vector<std::string> splittedBuffer = splitBuffer(completeBuffer, '\n');
@@ -230,7 +229,6 @@ void    Server::operatorCanals(const char *buffer, int fdSender) // A transforme
     }
     else if (buff.find("MODE") != std::string::npos)
     {
-        std::cout << RED << buff << RESET << std::endl;
         splitForMode(buff, fdSender);
     }
 	else if (buff.find("JOIN") != std::string::npos){
