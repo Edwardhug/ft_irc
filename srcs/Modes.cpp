@@ -84,11 +84,11 @@ void    Channel::addModes(char mode, Client& from, std::string target)
     it = _modes.find(mode);
     if (it == _modes.end())
     {
-        std::cout << "Mode non exist\n";
+        ERR_NEEDMOREPARAMS(from, "MODE");
         return;
     }
     if (it->second) {
-        std::cout << _name << ": " << "mode " << mode << " is already activate." << std::endl; //Envoyer message au clien
+        std::cout << _name << ": " << "mode " << mode << " is already activate." << std::endl; //Envoyer message au client
         return;
     }
     else
@@ -98,12 +98,12 @@ void    Channel::addModes(char mode, Client& from, std::string target)
         {
             if (target.empty())
             {
-                // TODO: "<client> <target chan/user> <mode char> <parameter> :<description>"
+                ERR_NEEDMOREPARAMS(from, "MODE");
                 return;
             }
             if (target.find(' ') != std::string::npos)
             {
-                // TODO: "<client> <target chan/user> <mode char> <parameter> :<description>"
+                ERR_BADCHANNELKEY(from, _name);
                 return ;
             }
             _password = target;
@@ -112,7 +112,8 @@ void    Channel::addModes(char mode, Client& from, std::string target)
         {
             if (target.empty())
             {
-                // TODO: "<client> <target chan/user> <mode char> <parameter> :<description>"
+                ERR_NEEDMOREPARAMS(from, "MODE");
+                return;
             }
             // TODO: Gestion d'erreur pas numero
             _maxClient = ft_atoi(target.c_str());
@@ -179,9 +180,8 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
     }
     if (datas.size() < 2)
     {
-       // RPL_CHANNELMODEIS(*from, datas[0], getModesActivat)
+        ERR_NEEDMOREPARAMS(*from, "MODE");
         return ;
-        //ERR_NEEDMOREPARAMS(*from, "MODE");
     }
     if (datas.size() == 3)
     {
@@ -193,7 +193,7 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
         errorPassword(*from);
     if (what.find('-') == std::string::npos && what.find('+') == std::string::npos)
     {
-        std::cerr << "Add - or + before the channel operator";
+        ERR_NEEDMOREPARAMS(*from, "MODE");
         return ;
     }
     for (size_t i = 0; i < this->_vecChannel.size(); i++)
