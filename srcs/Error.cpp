@@ -76,3 +76,15 @@ void RPL_CHANNELMODEIS(Client& client, std::string channel, std::string modes)
 {
     std::string reply = ":server 324 " + client.getNick() + " " + channel + " " + modes;
 }
+
+void ERR_MODEALREADY(Client& client, std::string channel, char mode, std::string thisErr)
+{
+    std::string err = ":Server NOTICE " + channel + " :MODE " + mode + " is already " + thisErr + "\r\n";
+    sendErrorToClient(err, client);
+}
+
+void ERR_OPEALREADY(Client& client, std::string& to, std::string channel)
+{
+    std::string err = ":Server NOTICE " + channel + " :MODE o " + to + " is already operator\r\n";
+    sendErrorToClient(err, client);
+}

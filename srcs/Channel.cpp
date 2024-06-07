@@ -57,6 +57,16 @@ bool Channel::checkPerm(char mode)
     return it->second;
 }
 
+bool Channel::checkOperatorWithName(std::string nick)
+{
+    for (size_t i = 0; i < _operators.size(); i++)
+    {
+        if (_operators[i]->getNick() == nick)
+            return true;
+    }
+    return false;
+}
+
 bool Channel::checkOperator(Client &client)
 {
     for (size_t i = 0; i < _operators.size(); i++)

@@ -43,7 +43,7 @@ class Channel {
     bool clientIsInvited(Client& client);
     std::string getPass();
     bool checkModesForJoin(Client& client);
-
+    bool checkOperatorWithName(std::string nick);
     void displayFDS();
     void channelMsg(std::string msg, int fdSender);
 };

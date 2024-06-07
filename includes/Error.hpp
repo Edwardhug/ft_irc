@@ -17,4 +17,7 @@ void ERR_CHANNELISFULL(Client& client, std::string channel);
 void ERR_INVITEONLYCHAN(Client& client, std::string channel);
 void ERR_BADCHANNELKEY(Client& client, std::string channel);
 void RPL_INVITING(Client& from, Client& to, std::string channel);
+
+void ERR_MODEALREADY(Client& client, std::string channel, char mode, std::string thisErr);
+void ERR_OPEALREADY(Client& client, std::string& to, std::string channel);
 #endif

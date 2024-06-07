@@ -60,3 +60,13 @@ int ft_atoi(const char* str) {
 
     return sign * result;
 }
+
+bool strIsDigit(std::string &str)
+{
+    for (size_t i = 0; i < str.size(); i++)
+    {
+        if (isdigit(str[i]) == 0)
+            return false;
+    }
+    return true;
+}

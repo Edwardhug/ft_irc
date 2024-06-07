@@ -56,10 +56,9 @@ std::string removeSpaces(std::string str)
 void Channel::addOperator(std::string target, Client& from)
 {
     target = removeSpaces(target);
-    if (checkOperator(from))
+    if (checkOperatorWithName(target))
     {
-        std::cout << "already operator" << std::endl;
-        return ;
+        return ERR_OPEALREADY(from, target, _name);
     }
     for (size_t i = 0; i < _clients.size(); i++)
     {
@@ -88,8 +87,7 @@ void    Channel::addModes(char mode, Client& from, std::string target)
         return;
     }
     if (it->second) {
-        std::cout << _name << ": " << "mode " << mode << " is already activate." << std::endl; //Envoyer message au clien
-        return;
+        return ERR_MODEALREADY(from, _name, mode, "activated");
     }
     else
     {
@@ -114,7 +112,10 @@ void    Channel::addModes(char mode, Client& from, std::string target)
             {
                 // TODO: "<client> <target chan/user> <mode char> <parameter> :<description>"
             }
-            // TODO: Gestion d'erreur pas numero
+            if (!strIsDigit(target))
+            {
+                return ERR_NEEDMOREPARAMS(from, "MODE");
+            }
             _maxClient = ft_atoi(target.c_str());
         }
         std::string notif = ":" + from.getNick() + " MODE " + _name + " +" + mode;
@@ -137,7 +138,7 @@ void Channel::delModes(char mode, Client& from, std::string target)
     }
     if (!it->second)
     {
-        std::cout << _name << ": " << "mode " << mode << " is already desactivate." << std::endl;
+        return ERR_MODEALREADY(from, _name, mode, "desactivated");
     }
     else
     {
@@ -152,8 +153,7 @@ void Channel::changeMode(char addOrDel, char mode, Client& from, std::string tar
     bool findClientInOperator = checkOperator(from);
     if (!findClientInOperator)
     {
-        std::cout << "Client is not an operator" << std::endl;
-        return ;
+        return ERR_CHANOPRIVSNEEDED(from, _name);
     }
     if (addOrDel == '+')
     {

@@ -19,4 +19,5 @@
     std::vector<std::string> split(const std::string &buffer, char delimiter);
     std::vector<std::string> splitBuffer(const std::string &buffer, char delimiter);
 	std::vector<std::string> splitAllSpaces(std::string &str);
+    bool strIsDigit(std::string &str);
 #endif
