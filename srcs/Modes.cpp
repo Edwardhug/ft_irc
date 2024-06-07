@@ -18,7 +18,7 @@ std::string getModesActivate(Channel chan)
         oss << maxClient;
         res += " " + oss.str();
     }
-    res += "\r\n"; //todo faudra voir avec sylvain si c'est bien ca qu'il faut renvoyer
+    res += "\r\n"; //todo faudra voir avec sylvain si c'est bien ca qu'il faut renvoyer 
     return res;
 }
 
