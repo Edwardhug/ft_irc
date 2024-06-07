@@ -74,9 +74,14 @@ void    Channel::addModes(char mode, Client& from, std::string target)
     if (mode == 'o' && !target.empty())
     {
         addOperator(target, from);
+        return ;
     }
     std::map<char, bool>::iterator it;
     it = _modes.find(mode);
+    if (it == _modes.end())
+    {
+        std::cout << "Mode non exist\n";
+    }
     if (it->second)
         std::cout << _name << ": " << "mode " << mode << " is already activate." << std::endl; //Envoyer message au client
     else
