@@ -46,6 +46,8 @@ class Channel {
 
     void displayFDS();
     void channelMsg(std::string msg, int fdSender);
+    std::map<char, bool> getModes();
+    unsigned int getMaxClient();
 };
 
 #endif

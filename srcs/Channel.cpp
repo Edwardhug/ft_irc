@@ -16,6 +16,16 @@ Channel::Channel(std::string name, Client *creator)
 
 Channel::~Channel() {}
 
+unsigned int Channel::getMaxClient()
+{
+    return this->_maxClient;
+}
+
+std::map<char, bool> Channel::getModes()
+{
+    return this->_modes;
+}
+
 std::string Channel::getName() const
 {
     return this->_name;

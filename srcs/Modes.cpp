@@ -1,10 +1,12 @@
 #include "../includes/Channel.hpp"
 #include "../includes/Error.hpp"
 
-std::string getModesActivate(std::map<char, bool>& modes, unsigned int maxClient)
+std::string getModesActivate(Channel chan)
 {
+    std::map<char, bool> modes = chan.getModes();
+    unsigned int maxClient = chan.getMaxClient();
     std::map<char, bool>::iterator it;
-    std::string res = "+";
+    std::string res = ":Serveur NOTICE " + chan.getName() + " Active modes are :+";
     for (it = modes.begin(); it != modes.end(); it++)
     {
         if (it->second)
@@ -16,6 +18,7 @@ std::string getModesActivate(std::map<char, bool>& modes, unsigned int maxClient
         oss << maxClient;
         res += " " + oss.str();
     }
+    res += "\r\n"; //todo faudra voir avec sylvain si c'est bien ca qu'il faut renvoyer
     return res;
 }
 
@@ -84,7 +87,7 @@ void    Channel::addModes(char mode, Client& from, std::string target)
     it = _modes.find(mode);
     if (it == _modes.end())
     {
-        ERR_NEEDMOREPARAMS(from, "MODE");
+        ERR_NEEDMOREPARAMS(from, "MODE"); //todo mettre le code d'erreur de sylvain
         return;
     }
     if (it->second) {
@@ -170,6 +173,23 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
     std::string data = buff.substr(buff.find("MODE") + 5); // TODO : Split et enlever le premier
     std::vector<std::string> datas = split(data, ' ');
     Client *from;
+    std::string toRet;
+
+    if (datas.size() == 1) {
+        Channel chan;
+        try {
+            chan = findChannelWithName(datas[0]);
+        }
+        catch (std::runtime_error& e)
+        {
+            std::cerr << e.what() << std::endl;
+            return;
+        }
+        toRet = getModesActivate(chan);
+        std::cout << GREEN << toRet << RESET << std::endl;
+        send(fdSender, toRet.c_str(), toRet.size(), 0);
+        return ;
+    }
     try {
         from = &findClientWithFd(fdSender);
     }
