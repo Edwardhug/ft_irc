@@ -29,7 +29,7 @@ class Channel {
 	void	addClient(Client *newClient);
     std::string getName() const;
 	std::vector<Client*> getVecClient();
-    void deleteOperator(std::string target);
+    void deleteOperator(std::string target, Client& from);
     void addOperator(std::string target, Client& from);
     void setTopic(std::string topic);
     std::string getTopic();
@@ -46,6 +46,8 @@ class Channel {
     bool checkOperatorWithName(std::string nick);
     void displayFDS();
     void channelMsg(std::string msg, int fdSender);
+    std::map<char, bool> getModes();
+    unsigned int getMaxClient();
 };
 
 #endif

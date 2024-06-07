@@ -1,10 +1,12 @@
 #include "../includes/Channel.hpp"
 #include "../includes/Error.hpp"
 
-std::string getModesActivate(std::map<char, bool>& modes, unsigned int maxClient)
+std::string getModesActivate(Channel chan)
 {
+    std::map<char, bool> modes = chan.getModes();
+    unsigned int maxClient = chan.getMaxClient();
     std::map<char, bool>::iterator it;
-    std::string res = "+";
+    std::string res = ":Serveur NOTICE " + chan.getName() + " Active modes are :+";
     for (it = modes.begin(); it != modes.end(); it++)
     {
         if (it->second)
@@ -16,11 +18,12 @@ std::string getModesActivate(std::map<char, bool>& modes, unsigned int maxClient
         oss << maxClient;
         res += " " + oss.str();
     }
+    res += "\r\n"; //todo faudra voir avec sylvain si c'est bien ca qu'il faut renvoyer
     return res;
 }
 
 
-void Channel::deleteOperator(std::string target)
+void Channel::deleteOperator(std::string target, Client& from)
 {
     std::vector<Client*>::iterator it;
     for (it = _operators.begin(); it != _operators.end(); it++)
@@ -28,6 +31,8 @@ void Channel::deleteOperator(std::string target)
         if ((*it)->getNick() == target)
         {
             _operators.erase(it);
+            std::string notif = ":" + from.getNick() + " MODE " + _name + " -o " + target + "\r\n";
+            channelMsg(notif, from.getFdClient());
             break ;
         }
     }
@@ -55,7 +60,6 @@ std::string removeSpaces(std::string str)
 
 void Channel::addOperator(std::string target, Client& from)
 {
-    target = removeSpaces(target);
     if (checkOperatorWithName(target))
     {
         return ERR_OPEALREADY(from, target, _name);
@@ -74,8 +78,12 @@ void Channel::addOperator(std::string target, Client& from)
 
 void    Channel::addModes(char mode, Client& from, std::string target)
 {
-    if (mode == 'o' && !target.empty())
+    if (mode == 'o')
     {
+        if (target.empty())
+        {
+            return ERR_NEEDMOREPARAMSCHANNEL(from, _name, "MODE +o");
+        }
         addOperator(target, from);
         return ;
     }
@@ -83,7 +91,7 @@ void    Channel::addModes(char mode, Client& from, std::string target)
     it = _modes.find(mode);
     if (it == _modes.end())
     {
-        std::cout << "Mode non exist\n";
+        ERR_NEEDMOREPARAMS(from, "MODE"); //todo mettre le code d'erreur de sylvain
         return;
     }
     if (it->second) {
@@ -91,17 +99,16 @@ void    Channel::addModes(char mode, Client& from, std::string target)
     }
     else
     {
-        _modes[mode] = true;
         if (mode == 'k')
         {
             if (target.empty())
             {
-                // TODO: "<client> <target chan/user> <mode char> <parameter> :<description>"
+                ERR_NEEDMOREPARAMSCHANNEL(from, _name, "MODE +k");
                 return;
             }
             if (target.find(' ') != std::string::npos)
             {
-                // TODO: "<client> <target chan/user> <mode char> <parameter> :<description>"
+                ERR_BADCHANNELKEY(from, _name);
                 return ;
             }
             _password = target;
@@ -110,20 +117,24 @@ void    Channel::addModes(char mode, Client& from, std::string target)
         {
             if (target.empty())
             {
-                // TODO: "<client> <target chan/user> <mode char> <parameter> :<description>"
+                ERR_NEEDMOREPARAMSCHANNEL(from, _name, "MODE +l");
+                return;
             }
             if (!strIsDigit(target))
             {
-                return ERR_NEEDMOREPARAMS(from, "MODE");
+                return ERR_NEEDMOREPARAMSCHANNEL(from, _name, "MODE +l");
             }
+            std::cout << RED << "je passe ici\n" << RESET;
             _maxClient = ft_atoi(target.c_str());
         }
+        _modes[mode] = true;
         std::string notif = ":" + from.getNick() + " MODE " + _name + " +" + mode;
         if (!target.empty())
         {
             notif += " " + target;
         }
         notif += "\r\n";
+        std::cout << RED << notif << RESET << std::endl;
         channelMsg(notif, from.getFdClient());
     }
 }
@@ -132,9 +143,14 @@ void Channel::delModes(char mode, Client& from, std::string target)
 {
     std::map<char, bool>::iterator it;
     it = _modes.find(mode);
-    if (mode == 'o' && !target.empty())
+    if (mode == 'o')
     {
-        deleteOperator(target);
+        if (target.empty())
+        {
+            return ERR_NEEDMOREPARAMSCHANNEL(from, _name, "MODE +o");
+        }
+        deleteOperator(target, from);
+        return ;
     }
     if (!it->second)
     {
@@ -150,6 +166,7 @@ void Channel::delModes(char mode, Client& from, std::string target)
 
 void Channel::changeMode(char addOrDel, char mode, Client& from, std::string target)
 {
+    target = removeSpaces(target);
     bool findClientInOperator = checkOperator(from);
     if (!findClientInOperator)
     {
@@ -169,6 +186,22 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
     std::string data = buff.substr(buff.find("MODE") + 5); // TODO : Split et enlever le premier
     std::vector<std::string> datas = split(data, ' ');
     Client *from;
+    std::string toRet;
+
+    if (datas.size() == 1) {
+        Channel chan;
+        try {
+            chan = findChannelWithName(datas[0]);
+        }
+        catch (std::runtime_error& e)
+        {
+            std::cerr << e.what() << std::endl;
+            return;
+        }
+        toRet = getModesActivate(chan);
+        send(fdSender, toRet.c_str(), toRet.size(), 0);
+        return ;
+    }
     try {
         from = &findClientWithFd(fdSender);
     }
@@ -176,12 +209,6 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
     {
         std::cerr << e.what() << std::endl;
         return;
-    }
-    if (datas.size() < 2)
-    {
-       // RPL_CHANNELMODEIS(*from, datas[0], getModesActivat)
-        return ;
-        //ERR_NEEDMOREPARAMS(*from, "MODE");
     }
     if (datas.size() == 3)
     {
@@ -191,11 +218,6 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
     std::string what = datas[1];
     if (!from->getPass())
         errorPassword(*from);
-    if (what.find('-') == std::string::npos && what.find('+') == std::string::npos)
-    {
-        std::cerr << "Add - or + before the channel operator";
-        return ;
-    }
     for (size_t i = 0; i < this->_vecChannel.size(); i++)
     {
         if (channel == _vecChannel[i].getName())

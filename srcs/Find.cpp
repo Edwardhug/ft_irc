@@ -35,5 +35,6 @@ Channel &Server::findChannelWithName(std::string name) {
 			return _vecChannel[i];
 		}
     }
-	return _vecChannel[i]; // arrive jamais ici parce qu'on fait les check avant
+    throw std::runtime_error("Channel not found with the name");
+	return _vecChannel[i];
 }
