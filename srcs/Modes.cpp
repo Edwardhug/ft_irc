@@ -56,7 +56,11 @@ std::string removeSpaces(std::string str)
 void Channel::addOperator(std::string target, Client& from)
 {
     target = removeSpaces(target);
-    //TODO: verifier qu'il n'est pas deja operateur
+    if (checkOperator(from))
+    {
+        std::cout << "already operator" << std::endl;
+        return ;
+    }
     for (size_t i = 0; i < _clients.size(); i++)
     {
         if (_clients[i]->getNick() == target)
@@ -81,9 +85,12 @@ void    Channel::addModes(char mode, Client& from, std::string target)
     if (it == _modes.end())
     {
         std::cout << "Mode non exist\n";
+        return;
     }
-    if (it->second)
-        std::cout << _name << ": " << "mode " << mode << " is already activate." << std::endl; //Envoyer message au client
+    if (it->second) {
+        std::cout << _name << ": " << "mode " << mode << " is already activate." << std::endl; //Envoyer message au clien
+        return;
+    }
     else
     {
         _modes[mode] = true;
@@ -110,8 +117,13 @@ void    Channel::addModes(char mode, Client& from, std::string target)
             // TODO: Gestion d'erreur pas numero
             _maxClient = ft_atoi(target.c_str());
         }
-        std::string notif = ":" + from.getNick() + " MODE " + _name + " +" + mode + "\r\n";
-        //channelMsg(notif.c_str(), from.getFdClient()); 
+        std::string notif = ":" + from.getNick() + " MODE " + _name + " +" + mode;
+        if (!target.empty())
+        {
+            notif += " " + target;
+        }
+        notif += "\r\n";
+        channelMsg(notif, from.getFdClient());
     }
 }
 
@@ -131,7 +143,7 @@ void Channel::delModes(char mode, Client& from, std::string target)
     {
         it->second = false;
         std::string notif = ":" + from.getNick() + " MODE " + _name + " -" + mode + "\r\n";
-//            channelMsg(notif.c_str(), from.getFdClient());
+        channelMsg(notif, from.getFdClient());
     }
 }
 

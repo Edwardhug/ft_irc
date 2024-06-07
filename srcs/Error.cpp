@@ -66,7 +66,8 @@ void ERR_BADCHANNELKEY(Client& client, std::string channel)
 
 void RPL_INVITING(Client& from, Client& to, std::string channel)
 {
-    std::string reply = ":" + from.getNick() + " 341 " + to.getNick() + " " + channel + "\r\n";
+    std::string reply = ":server 341 " + from.getNick() + " " + to.getNick() + " " + channel + "\r\n";
+    std::cout << GREEN << reply << RESET << std::endl;
     sendErrorToClient(reply, from);
     sendErrorToClient(reply, to);
 }
