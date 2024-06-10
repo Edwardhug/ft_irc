@@ -38,7 +38,7 @@ void	Server::sendConfirmation(std::vector<std::string> data, Client &client) {
                     nameList += "@" + vecClient[j]->getNick() + " ";
                 else
                     nameList += vecClient[j]->getNick() + " ";
-                nameList += vecClient[j]->getNick() + " ";
+               // nameList += vecClient[j]->getNick() + " ";
             }
             nameList += "\r\n"; // ? peut etre un soucis avec les nom qui apparaisse 2 fois mais ca a pas l'air d'etre un probleme
             send(client.getFdClient(), nameList.c_str(), nameList.length(), 0);

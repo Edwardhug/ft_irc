@@ -93,3 +93,27 @@ void ERR_OPEALREADY(Client& client, std::string& to, std::string channel)
     std::string err = ":Server NOTICE " + channel + " :MODE o " + to + " is already operator\r\n";
     sendErrorToClient(err, client);
 }
+
+void ERR_ALREADYREGISTERED(Client& client)
+{
+    std::string err = ":server 462 " + client.getNick() + " :You may not reregister\r\n";
+    sendErrorToClient(err, client);
+}
+
+void ERR_NONICKNAMEGIVEN(Client& client)
+{
+    std::string err = ":server 431 " + client.getNick() + " :No nickname given\r\n";
+    sendErrorToClient(err, client);
+}
+
+void ERR_NICKNAMEINUSE(Client& client, std::string& nick)
+{
+    std::string err = ":server 433 " + client.getNick() + " " + nick + " :Nickname is already in use\r\n";
+    sendErrorToClient(err, client);
+}
+
+void ERR_ERRONEUSNICKNAME(Client& client, std::string& nick)
+{
+    std::string err = ":server 432 " + client.getNick() + " " + nick + " :Erroneus nickname\r\n";
+    sendErrorToClient(err, client);
+}

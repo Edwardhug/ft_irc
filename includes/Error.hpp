@@ -20,4 +20,8 @@ void RPL_INVITING(Client& from, Client& to, std::string channel);
 void ERR_NEEDMOREPARAMSCHANNEL(Client& client, std::string channel, std::string fx);
 void ERR_MODEALREADY(Client& client, std::string channel, char mode, std::string thisErr);
 void ERR_OPEALREADY(Client& client, std::string& to, std::string channel);
+void ERR_ALREADYREGISTERED(Client& client);
+void ERR_NONICKNAMEGIVEN(Client& client);
+void ERR_NICKNAMEINUSE(Client& client, std::string &nick);
+void ERR_ERRONEUSNICKNAME(Client& client, std::string& nick);
 #endif

@@ -124,7 +124,6 @@ void    Channel::addModes(char mode, Client& from, std::string target)
             {
                 return ERR_NEEDMOREPARAMSCHANNEL(from, _name, "MODE +l");
             }
-            std::cout << RED << "je passe ici\n" << RESET;
             _maxClient = ft_atoi(target.c_str());
         }
         _modes[mode] = true;
@@ -134,7 +133,6 @@ void    Channel::addModes(char mode, Client& from, std::string target)
             notif += " " + target;
         }
         notif += "\r\n";
-        std::cout << RED << notif << RESET << std::endl;
         channelMsg(notif, from.getFdClient());
     }
 }

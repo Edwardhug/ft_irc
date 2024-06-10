@@ -17,6 +17,7 @@ SRCS =	main.cpp \
 		Password.cpp \
 		Find.cpp \
 		Error.cpp \
+		Name.cpp \
 
 INCLUDE =	lib.hpp \
 			Client.hpp \

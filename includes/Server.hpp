@@ -63,6 +63,8 @@ public:
     void inviteClient(std::string &buff, int fdSender);
     void kickClient(std::string &buff, int fdSender);
     void sendMessageToChannel(std::string buff, std::string message);
+    bool nickAlreadyExist(std::string &nick);
+    bool verifyNick(std::string &nick);
 };
 
 #endif

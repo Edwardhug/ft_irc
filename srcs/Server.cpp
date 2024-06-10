@@ -191,63 +191,43 @@ void	Server::readReceivedData(int fd)
 }
 
 //===================NICK===========================
-void    Server::attributeNickName(int fd, const char *buffer)
-{
-    std::string find;
-    find = static_cast<std::string>(buffer);
-    if (find.find("NICK") != std::string::npos)
-    {
-        for (size_t i = 0; i < _vecClient.size(); i++)
-        {
-            if (_vecClient[i].getFdClient() == fd)
-            {
-                std::string newNick = find.substr(find.find("NICK") + 5);
-                _vecClient[i].setNick(newNick);
-                std::cout << "The nick is : " << _vecClient[i].getNick() << std::endl;
-                return ;
-            }
-        }
-    }
-}
 
 //====================================================
-void    Server::operatorCanals(const char *buffer, int fdSender) // A transformer en switch case ?
+void    Server::operatorCanals(const char *buffer, int fdSender)
 {
     std::string buff = static_cast<std::string>(buffer);
 
-    if (buff.find("PRIVMSG") != std::string::npos && buff.size() > 8 && buff[8] == '#')
-    {
-        channelMsg(const_cast<char*>(buffer), fdSender);
-    }
-    else if (buff.find("NICK") != std::string::npos)
-    {
-        attributeNickName(fdSender, buffer);
-    }
-    else if (buff.find("PRIVMSG") != std::string::npos)
-    {
-        splitForPrivMsg(buff, fdSender);
-    }
-    else if (buff.find("MODE") != std::string::npos)
-    {
-        splitForMode(buff, fdSender);
-    }
-	else if (buff.find("JOIN") != std::string::npos){
-		splitForJoin(buff, fdSender);
-	}
-    else if (buff.find("PASS") != std::string::npos)
+    if (buff.find("PASS") != std::string::npos)
     {
         checkPass(buff, fdSender);
     }
-    else if (buff.find("TOPIC") != std::string::npos) {
-        splitForTopic(buff, fdSender);
-    }
-    else if (buff.find("INVITE") != std::string::npos)
+    Client *from;
+    try
     {
-        inviteClient(buff, fdSender);
+        from = &findClientWithFd(fdSender);
     }
-    else if (buff.find("KICK") != std::string::npos)
+    catch (std::runtime_error& e)
     {
-        kickClient(buff, fdSender);
+        std::cout << e.what() << std::endl;
+    }
+    if (from->getPass()) {
+        if (buff.find("PRIVMSG") != std::string::npos && buff.size() > 8 && buff[8] == '#') {
+            channelMsg(const_cast<char *>(buffer), fdSender);
+        } else if (buff.find("NICK") != std::string::npos) {
+            attributeNickName(fdSender, buffer);
+        } else if (buff.find("PRIVMSG") != std::string::npos) {
+            splitForPrivMsg(buff, fdSender);
+        } else if (buff.find("MODE") != std::string::npos) {
+            splitForMode(buff, fdSender);
+        } else if (buff.find("JOIN") != std::string::npos) {
+            splitForJoin(buff, fdSender);
+        } else if (buff.find("TOPIC") != std::string::npos) {
+            splitForTopic(buff, fdSender);
+        } else if (buff.find("INVITE") != std::string::npos) {
+            inviteClient(buff, fdSender);
+        } else if (buff.find("KICK") != std::string::npos) {
+            kickClient(buff, fdSender);
+        }
     }
 }
 

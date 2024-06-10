@@ -5,7 +5,6 @@ void Server::inviteClient(std::string &buff, int fdSender)
     std::string data = buff.substr(buff.find("INVITE") + 7);
     Client from = findClientWithFd(fdSender);
     std::vector<std::string> datas = split(data, ' ');
-    std::cout << RED << datas.size() << RESET << std::endl;
     if (datas.size() < 2)
     {
         return ERR_NEEDMOREPARAMS(from, "INVITE");
