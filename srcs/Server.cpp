@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include "../includes/lib.hpp"
 #include "../includes/Error.hpp"
+#include <cstdio>
 
 Server::Server(int port, std::string password) : _port(port), _password(password)
 {
@@ -58,6 +59,17 @@ void Server::clearClient(int fd) //? Peut etre closes les fds
     }
 }
 
+void Server::servSendMessageToClient(const std::string &message, Client &client)
+{
+    ssize_t bytesSent = send(client.getFdClient(), message.c_str(), message.length(), 0);
+    if (bytesSent == -1)
+    {
+        std::cerr << RED << "Error when sending data to client " << client.getNick() << ": ";
+        perror("");
+        std::cerr << RESET;
+    }
+}
+
 void Server::closeFds()
 {
     std::vector<Client>::iterator it;
@@ -74,10 +86,7 @@ void Server::closeFds()
     }
 }
 
-void Server::servSendMessageToClient(const std::string &message, Client &client)
-{
-    send(client.getFdClient(), message.c_str(), message.length(), 0);
-}
+
 
 void Server::servInit() {
     sockaddr_in data_sock;
@@ -209,12 +218,13 @@ void    Server::operatorCanals(const char *buffer, int fdSender)
     catch (std::runtime_error& e)
     {
         std::cout << e.what() << std::endl;
+        return ;
     }
     if (from->getPass()) {
         if (buff.find("PRIVMSG") != std::string::npos && buff.size() > 8 && buff[8] == '#') {
             channelMsg(const_cast<char *>(buffer), fdSender);
         } else if (buff.find("NICK") != std::string::npos) {
-            attributeNickName(fdSender, buffer);
+            attributeNickName(fdSender, buff);
         } else if (buff.find("PRIVMSG") != std::string::npos) {
             splitForPrivMsg(buff, fdSender);
         } else if (buff.find("MODE") != std::string::npos) {
@@ -227,7 +237,10 @@ void    Server::operatorCanals(const char *buffer, int fdSender)
             inviteClient(buff, fdSender);
         } else if (buff.find("KICK") != std::string::npos) {
             kickClient(buff, fdSender);
+        } else if (buff.find("USER") != std::string::npos) {
+            setUsername(fdSender, buff);
         }
+
     }
 }
 

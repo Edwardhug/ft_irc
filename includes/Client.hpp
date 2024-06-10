@@ -12,6 +12,8 @@ class Client
     int _fdClient;
     std::string _ipAddrClient;
     std::string _nick;
+    std::string _username;
+    std::string _realname;
     bool _corrPass;
 	bool		_inChannel;
 	Channel		*_activeChannel;
@@ -34,6 +36,10 @@ class Client
 	void	setChannel(Channel &channel);
 	Channel getActiveChannel();
     bool operator==(const Client& other) const;
+    std::string getUsername() const;
+    std::string getRealname() const;
+    void setUsername(std::string &usr);
+    void setRealname(std::string &rl);
 };
 
 #endif

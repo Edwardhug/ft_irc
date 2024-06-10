@@ -1,10 +1,8 @@
 #include "../includes/Server.hpp"
 #include "../includes/Error.hpp"
-void    Server::attributeNickName(int fd, const char *buffer)
+void    Server::attributeNickName(int fd, std::string& buff)
 {
-    std::string find;
-    find = static_cast<std::string>(buffer);
-    std::string newNick = find.substr(find.find("NICK") + 5);
+    std::string newNick = buff.substr(buff.find("NICK") + 5);
     Client *from;
     try {
         from = &findClientWithFd(fd);
@@ -12,6 +10,7 @@ void    Server::attributeNickName(int fd, const char *buffer)
     catch (std::runtime_error& e)
     {
         std::cout << e.what() << std::endl;
+        return ;
     }
     if (newNick.empty())
     {
@@ -25,16 +24,7 @@ void    Server::attributeNickName(int fd, const char *buffer)
     {
         return ERR_NICKNAMEINUSE(*from, newNick);
     }
-    for (size_t i = 0; i < _vecClient.size(); i++)
-    {
-        if (_vecClient[i].getFdClient() == fd)
-        {
-
-            _vecClient[i].setNick(newNick);
-            std::cout << "The nick is : " << _vecClient[i].getNick() << std::endl;
-            return ;
-        }
-    }
+    from->setNick(newNick);
 }
 
 bool    Server::verifyNick(std::string& nick)
@@ -54,4 +44,33 @@ bool    Server::nickAlreadyExist(std::string& nick)
             return true;
     }
     return false;
+}
+
+void    Server::setUsername(int fdSender, std::string& buff)
+{
+    buff = buff.substr(buff.find("USER") + 5);
+    std::vector<std::string>datas = splitBuffer(buff, ' ');
+    Client *from;
+    try
+    {
+        from = &findClientWithFd(fdSender);
+    }
+    catch (std::runtime_error& e)
+    {
+        std::cout << e.what() << std::endl;
+        return ;
+    }
+    std::cout << RED << datas.size() << RESET << std::endl;
+    if (datas.size() < 4 || datas[0].empty() || datas[3].empty())
+    {
+        return ERR_NEEDMOREPARAMS(*from, "USER");
+    }
+    if (!from->getRealname().empty() && !from->getUsername().empty())
+    {
+        return ERR_ALREADYREGISTERED(*from);
+    }
+    if (datas[1] != "0" && datas[2] != "*")
+        return;
+    from->setUsername(datas[0]);
+    from->setRealname(datas[3]);
 }

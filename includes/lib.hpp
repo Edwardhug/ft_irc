@@ -5,6 +5,9 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include "../includes/Client.hpp"
+#include <cstdio>
+
 	# define BUFFER_SIZE 1024
 	# define RED "\033[1;31m"
 	# define GREEN "\033[1;32m"

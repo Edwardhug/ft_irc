@@ -42,7 +42,12 @@ void    Channel::channelMsg(std::string msg, int fdSender)
 {
     for (size_t i = 0; i < _clients.size(); i++)
     {
-            send(_clients[i]->getFdClient(), msg.c_str(), msg.size(), 0);
+        ssize_t bytesSent = send(_clients[i]->getFdClient(), msg.c_str(), msg.size(), 0);
+        if (bytesSent == -1) {
+            std::cerr << RED << "Error when sending data to client " << _clients[i]->getNick() << ": ";
+            perror("");
+            std::cerr << RESET;
+        }
     }
     (void)fdSender;
 }
@@ -197,7 +202,22 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
             return;
         }
         toRet = getModesActivate(chan);
-        send(fdSender, toRet.c_str(), toRet.size(), 0);
+        ssize_t bytesSent = send(fdSender, toRet.c_str(), toRet.size(), 0);
+        if (bytesSent == -1)
+        {
+            Client* c;
+            try
+            {
+                c = &findClientWithFd(fdSender);
+            }
+            catch (std::runtime_error& e)
+            {
+                std::cout << e.what() << std::endl;
+            }
+            std::cerr << RED << "Error when sending data to client " << c->getNick() << ": ";
+            perror("");
+            std::cerr << RESET;
+        }
         return ;
     }
     try {

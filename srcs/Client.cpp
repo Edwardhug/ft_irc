@@ -3,6 +3,8 @@
 Client::Client() : _fdClient(-1), _corrPass(false)
 {
 	_inChannel = false;
+    _username = "";
+    _realname = "";
 }
 
 Client::~Client() {}
@@ -69,4 +71,21 @@ Channel Client::getActiveChannel() {
 bool    Client::operator==(const Client &other) const
 {
     return _fdClient == other._fdClient;
+}
+
+std::string Client::getUsername() const
+{
+    return _username;
+}
+
+std::string Client::getRealname() const {
+    return _realname;
+}
+
+void Client::setUsername(std::string& usr) {
+    _username = usr;
+}
+
+void Client::setRealname(std::string &rl) {
+    _realname = rl;
 }

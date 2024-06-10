@@ -24,4 +24,8 @@ void ERR_ALREADYREGISTERED(Client& client);
 void ERR_NONICKNAMEGIVEN(Client& client);
 void ERR_NICKNAMEINUSE(Client& client, std::string &nick);
 void ERR_ERRONEUSNICKNAME(Client& client, std::string& nick);
+void RPL_AWAY(Client& client, std::string &nick, std::string message);
+void ERR_NOSUCHNICK(Client& client, std::string &nick);
+void ERR_NOTEXTTOSEND(Client &client);
+void ERR_USERNOTINCHANNEL(Client& client, std::string &nick, std::string channel);
 #endif

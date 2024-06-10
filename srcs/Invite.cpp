@@ -3,11 +3,19 @@
 void Server::inviteClient(std::string &buff, int fdSender)
 {
     std::string data = buff.substr(buff.find("INVITE") + 7);
-    Client from = findClientWithFd(fdSender);
+    Client *from;
+    try{
+        from = &findClientWithFd(fdSender);
+    }
+    catch (std::runtime_error& e)
+    {
+        std::cout << e.what() << std::endl;
+        return ;
+    }
     std::vector<std::string> datas = split(data, ' ');
     if (datas.size() < 2)
     {
-        return ERR_NEEDMOREPARAMS(from, "INVITE");
+        return ERR_NEEDMOREPARAMS(*from, "INVITE");
     }
     std::string newClientNick = datas[0];
     std::string channel = datas[1];
@@ -22,15 +30,15 @@ void Server::inviteClient(std::string &buff, int fdSender)
     }
     if (chToFind == NULL)
     {
-        return ERR_NOSUCHCHANNEL(from, channel);
+        return ERR_NOSUCHCHANNEL(*from, channel);
     }
-    if (!chToFind->clientInChannel(from))
+    if (!chToFind->clientInChannel(*from))
     {
-        return ERR_NOTONCHANNEL(from, channel);
+        return ERR_NOTONCHANNEL(*from, channel);
     }
-    if (chToFind->checkPerm('i') && !chToFind->checkOperator(from))
+    if (chToFind->checkPerm('i') && !chToFind->checkOperator(*from))
     {
-        return ERR_CHANOPRIVSNEEDED(from, channel);
+        return ERR_CHANOPRIVSNEEDED(*from, channel);
     }
     Client *newClient = NULL;
     for (size_t i = 0; i < _vecClient.size(); i++)
@@ -43,17 +51,13 @@ void Server::inviteClient(std::string &buff, int fdSender)
     }
     if (newClient == NULL)
     {
-        return ERR_WASNOSUCHNICK(from, newClientNick);
+        return ERR_WASNOSUCHNICK(*from, newClientNick);
     }
     if (chToFind->clientInChannel(*newClient))
     {
-        return ERR_USERONCHANNEL(from, newClientNick, channel);
+        return ERR_USERONCHANNEL(*from, newClientNick, channel);
     }
     chToFind->addClientInvited(newClient);
-    RPL_INVITING(from, *newClient, channel);
-    // TODO : TROUVER COMMENT FIX, message pas complet
-    //std::string rlpInviting = ":server 341 " + from.getNick() + " " + newClientNick + " " + channel + "\r\n";
-    //servSendMessageToClient(rlpInviting, from);
-    //TODO : RPL_INVITING
+    RPL_INVITING(*from, *newClient, channel);
 }
 

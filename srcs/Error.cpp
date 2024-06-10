@@ -117,3 +117,27 @@ void ERR_ERRONEUSNICKNAME(Client& client, std::string& nick)
     std::string err = ":server 432 " + client.getNick() + " " + nick + " :Erroneus nickname\r\n";
     sendErrorToClient(err, client);
 }
+
+void RPL_AWAY(Client& client, std::string &nick, std::string message)
+{
+    std::string rpl = ":server 301 " + client.getNick() + " " + nick + " :" + message + "\r\n";
+    sendErrorToClient(rpl, client);
+}
+
+void ERR_NOSUCHNICK(Client& client, std::string &nick)
+{
+    std::string err = ":server 401 " + client.getNick() + " " + nick + " :No such nick\r\n";
+    sendErrorToClient(err, client);
+}
+
+void ERR_NOTEXTTOSEND(Client &client)
+{
+    std::string err = ":server 412 " + client.getNick() + " :No text to send\r\n";
+    sendErrorToClient(err, client);
+}
+
+void ERR_USERNOTINCHANNEL(Client& client, std::string &nick, std::string channel)
+{
+    std::string err = ":server 441 " + client.getNick() + " " + nick + " " + channel + " :They aren't on that channel\r\n";
+    sendErrorToClient(err, client);
+}
