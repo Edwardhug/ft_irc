@@ -7,6 +7,7 @@
 #include <sstream>
 #include "../includes/Client.hpp"
 #include <cstdio>
+    class Client;
 
 	# define BUFFER_SIZE 1024
 	# define RED "\033[1;31m"
@@ -23,4 +24,6 @@
     std::vector<std::string> splitBuffer(const std::string &buffer, char delimiter);
 	std::vector<std::string> splitAllSpaces(std::string &str);
     bool strIsDigit(std::string &str);
+    bool servSendMessageToClient(const std::string &message, Client &client);
+
 #endif

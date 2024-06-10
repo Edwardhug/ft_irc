@@ -4,7 +4,7 @@
 //===================PRIVMSG========================
 void    Server::sendmsg(const std::string &from, const std::string &to, const std::string& message) // il n'affiche pas qui a envoyer le message
 {
-    int fd;
+    Client* clientTo;
     Client* clientFrom;
     try {
         clientFrom = &findClientWithNick(from);
@@ -13,7 +13,7 @@ void    Server::sendmsg(const std::string &from, const std::string &to, const st
         std::cout << e.what() << std::endl;
     }
     try {
-        fd = findClientWithNick(to).getFdClient();
+        clientTo = &findClientWithNick(to);
     }
     catch (const std::runtime_error& e)
     {
@@ -21,13 +21,8 @@ void    Server::sendmsg(const std::string &from, const std::string &to, const st
         return ERR_NOSUCHNICK(*clientFrom, const_cast<std::string&>(to));
     }
     std::string completeMessage = ":" + from + " PRIVMSG " + to + " :" + message + "\r\n";
-    ssize_t bytesSend;
-    bytesSend = send(fd, completeMessage.c_str(), completeMessage.length(), 0);// peut etre changer les flags
-    if (bytesSend == -1)
-    {
-        std::cout << "Error when send data for a PRIVMSG" << std::endl;
-        return ;
-    }
+    servSendMessageToClient(completeMessage, *clientFrom);
+    (void)clientTo;
 }
 
 void    Server::splitForPrivMsg(const std::string &buff, int fdSender)

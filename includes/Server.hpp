@@ -56,7 +56,6 @@ public:
 	void	channelMsg(char *buffer, int fdSender);
 	void	sendConfirmation(std::vector<std::string> data, Client &client);
 	void    checkPass(const std::string &buff, int fdClient);
-    void servSendMessageToClient(const std::string &message, Client &client);
     void errorPassword(Client& client);
     char *getMessage(char *buffer);
     void splitForTopic(std::string buff, int fdSender);

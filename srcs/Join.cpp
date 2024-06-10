@@ -14,12 +14,8 @@ void    Server::sendMessageToChannel(std::string channelName, std::string messag
     for (size_t i = 0; i < vecClient.size(); ++i) {
         int clientFd = vecClient[i]->getFdClient();
         if (clientFd != -1) {
-            ssize_t bytesSent = send(clientFd, message.c_str(), message.length(), 0);
-            if (bytesSent == -1) {
-                std::cerr << RED << "Error when sending data to client " << vecClient[i]->getNick() << ": ";
-                perror("");
-                std::cerr << RESET;
-            }
+            if (!servSendMessageToClient(message, *vecClient[i]))
+                return; // TODO Verifier
         }
     }
 }
@@ -28,13 +24,8 @@ void	Server::sendConfirmation(std::vector<std::string> data, Client &client) {
 	std::string joinMsg = ":" + client.getNick() + " JOIN " + data[1] + "\r\n"; // envoie au nouveau client le message de join et ajoute le client au channel
     sendMessageToChannel(data[1], joinMsg);
     std::string topicMsg = ":server 332 " + client.getNick() + " " + data[1] + " :Welcome to the new channel " + data[1] + "\r\n";
-    ssize_t bytesSent = send(client.getFdClient(), topicMsg.c_str(), topicMsg.length(), 0);
-    if (bytesSent == -1)
-    {
-        std::cerr << RED << "Error when sending data to client " << client.getNick() << ": ";
-        perror("");
-        std::cerr << RESET;
-    }
+    if (!servSendMessageToClient(topicMsg, client))
+        return ;
     std::string nameList = ":server 353 " + client.getNick() + " = " + data[1] + " :"; // envoie au client la liste des noms des clients dans le channel
     for (size_t i = 0; i < _vecChannel.size(); ++i) {
         if (_vecChannel[i].getName() == data[1]) {
@@ -47,23 +38,14 @@ void	Server::sendConfirmation(std::vector<std::string> data, Client &client) {
                // nameList += vecClient[j]->getNick() + " ";
             }
             nameList += "\r\n"; // ? peut etre un soucis avec les nom qui apparaisse 2 fois mais ca a pas l'air d'etre un probleme
-            bytesSent = send(client.getFdClient(), nameList.c_str(), nameList.length(), 0);
-            if (bytesSent == -1)
-            {
-                std::cerr << RED << "Error when sending data to client " << client.getNick() << ": ";
-                perror("");
-                std::cerr << RESET;
-            }
+            if (!servSendMessageToClient(nameList, client))
+                return ;
             break;
         }
     }
     std::string endOfNamesMsg = ":server 366 " + client.getNick() + " " + data[1] + " :End of /NAMES list\r\n";
-    bytesSent = send(client.getFdClient(), endOfNamesMsg.c_str(), endOfNamesMsg.length(), 0);
-    if (bytesSent == -1) {
-        std::cerr << RED << "Error when sending data to client " << client.getNick() << ": ";
-        perror("");
-        std::cerr << RESET;
-    }
+    if (!servSendMessageToClient(endOfNamesMsg, client))
+        return ;
 }
 
 //=====================JOIN============================
@@ -209,12 +191,8 @@ void Server::channelMsg(char *buffer, int fdSender) {
     for (size_t i = 0; i < vecClient.size(); ++i) {
         int clientFd = vecClient[i]->getFdClient();
         if (clientFd != fdSender) {
-            ssize_t bytesSent = send(clientFd, fullMessage.c_str(), fullMessage.length(), 0);
-            if (bytesSent == -1) {
-                std::cerr << RED << "Error when sending data to client " << vecClient[i]->getNick() << ": ";
-                perror("");
-                std::cerr << RESET;
-            }
+            if (!servSendMessageToClient(fullMessage, *vecClient[i]))
+                return ;
         }
     }
 }

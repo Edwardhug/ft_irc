@@ -26,7 +26,8 @@ void	Server::splitForTopic(std::string buff, int fdSender) {
 		}
 		channel.setTopic("");
 		std::string message = ":Server NOTICE " + channelName + " Channel topic is now clear." + "\r\n";
-		servSendMessageToClient(message, *client);
+		if (!servSendMessageToClient(message, *client))
+            return ;
 	}
 	else if (data.size() >= 3 && channelExist(data[1]) == true) {
 		if (channel.checkPerm('t') == true && channel.checkOperator(*client) == false ) {
@@ -34,11 +35,13 @@ void	Server::splitForTopic(std::string buff, int fdSender) {
 		}
 		channel.setTopic(data[2]);
 		std::string message = ":Server NOTICE " + channelName + " Setting the new topic on \""+ channelName + "\" to \"" + channel.getTopic() + "\".\r\n";
-		servSendMessageToClient(message, *client);
+		if (!servSendMessageToClient(message, *client))
+            return ;
 	}
 	else if (data.size() == 2 && channelExist(data[1]) == true) {
 		std::string message = ":Server NOTICE " + channelName + " Channel topic is \"" + channel.getTopic() + "\".\r\n";
-		servSendMessageToClient(message, *client);
+		if (!servSendMessageToClient(message, *client))
+            return ;
 	}
 	else {
 		return ERR_NOSUCHCHANNEL(*client, data[1]);

@@ -43,7 +43,9 @@ void	Server::kickClient(std::string &buff, int fdSender) {
 	}
 	channel.removeClient(clientToKick);
 	std::string message = ":server KICK " + channel.getName() + " " + clientToKick.getNick() + " :Kicked by " + client->getNick() + "\r\n";
-	servSendMessageToClient(message, *client);
-	servSendMessageToClient(message, clientToKick);
+	if (!servSendMessageToClient(message, *client))
+        return ;
+	if (!servSendMessageToClient(message, clientToKick))
+        return ;
 }
  

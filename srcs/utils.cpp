@@ -70,3 +70,16 @@ bool strIsDigit(std::string &str)
     }
     return true;
 }
+
+bool servSendMessageToClient(const std::string &message, Client &client)
+{
+    ssize_t bytesSent = send(client.getFdClient(), message.c_str(), message.length(), 0);
+    if (bytesSent == -1)
+    {
+        std::cerr << RED << "Error when sending data to client " << client.getNick() << ": ";
+        perror("");
+        std::cerr << RESET;
+        return false;
+    }
+    return true;
+}
