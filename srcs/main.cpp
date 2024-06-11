@@ -28,14 +28,13 @@ int	main(int ac, char **av)
 	try {
 		std::signal(SIGINT, signalHandler);
 		std::signal(SIGQUIT, signalHandler);
-		// need to start the prog here
 		serv.servInit();
 		serv.servLoop();
 	}
 	catch (std::exception &e) {
 		std::cerr << e.what() << std::endl;
-		// need to close fds
 	}
+	serv.closeFds();
 	std::cout << "Server closed\n";
 	(void) serv;
 	return (0);
