@@ -3,7 +3,7 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include "../includes/lib.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 #include <cstdio>
 
 Server::Server(int port, std::string password) : _port(port), _password(password)

@@ -1,5 +1,5 @@
 #include "../includes/lib.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 
 Client&	Server::findClientWithNick(const std::string &nick)
 {
@@ -36,5 +36,4 @@ Channel &Server::findChannelWithName(std::string name) {
 		}
     }
     throw std::runtime_error("Channel not found with the name");
-	return _vecChannel[i];
 }

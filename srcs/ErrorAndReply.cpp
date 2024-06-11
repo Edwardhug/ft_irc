@@ -1,4 +1,4 @@
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 
 void ERR_NOSUCHCHANNEL(Client& client, std::string channel)
 {
@@ -137,4 +137,18 @@ void ERR_USERNOTINCHANNEL(Client& client, std::string &nick, std::string channel
 {
     std::string err = ":server 441 " + client.getNick() + " " + nick + " " + channel + " :They aren't on that channel\r\n";
     servSendMessageToClient(err, client);
+}
+
+void Server::RPL_JOIN(Client &client, std::string& channel)
+{
+    std::string joinMsg = ":" + client.getNick() + " JOIN " + channel + "\r\n";
+    sendMessageToChannel(channel, joinMsg);
+}
+
+bool RLP_JOINTOPIC(Client& client, std::string& channel)
+{
+    std::string topicMsg = ":server 332 " + client.getNick() + " " + channel + " :Welcome to the new channel " + channel + "\r\n";
+    if (!servSendMessageToClient(topicMsg, client))
+        return false;
+    return true;
 }

@@ -1,5 +1,5 @@
 #include "../includes/lib.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 
 void    Server::checkPass(const std::string &buff, int fdClient)
 {

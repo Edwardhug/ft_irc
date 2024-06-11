@@ -101,7 +101,7 @@ void    Channel::removeClient(Client &toRemove)
 {
     for (size_t i = 0; i < _clients.size(); i++)
     {
-        if (_clients[i]->getFdClient() == toRemove.getFdClient())
+        if (*_clients[i] == toRemove)
         {
             _clients.erase(_clients.begin() + i);
             return;
@@ -122,12 +122,4 @@ bool Channel::clientIsInvited(Client &client)
 std::string Channel::getPass()
 {
     return _password;
-}
-
-void Channel::displayFDS()
-{
-    for (size_t i = 0; i < _operators.size(); i++)
-    {
-        std::cout << RED << _operators[i]->getFdClient() << RESET << std::endl;
-    }
 }

@@ -1,5 +1,5 @@
 #include "../includes/Channel.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 
 std::string getModesActivate(Channel chan)
 {
@@ -18,7 +18,7 @@ std::string getModesActivate(Channel chan)
         oss << maxClient;
         res += " " + oss.str();
     }
-    res += "\r\n"; //todo faudra voir avec sylvain si c'est bien ca qu'il faut renvoyer
+    res += "\r\n";
     return res;
 }
 
@@ -40,10 +40,8 @@ void Channel::deleteOperator(std::string target, Client& from)
 
 void    Channel::msgToChannel(std::string msg)
 {
-    //std::cout << RED << _clients.size() << RESET << std::endl;
     for (size_t i = 0; i < _clients.size(); i++)
     {
-        //std::cout << BLUE << i << " " << _clients[i]->getNick() << RESET <<  std::endl;
         if (!servSendMessageToClient(msg, *_clients[i]))
             return;
     }
@@ -180,15 +178,20 @@ void Channel::changeMode(char addOrDel, char mode, Client& from, std::string tar
        delModes(mode, from, target);
 }
 
+bool    Server::sendActivatedModes()
+{
+    
+}
+
 void    Server::splitForMode(const std::string &buff, int fdSender)
 {
     std::string target;
-    std::string data = buff.substr(buff.find("MODE") + 5); // TODO : Split et enlever le premier
+    std::string data = buff.substr(buff.find("MODE") + 5);
     std::deque<std::string> datas = split(data, ' ');
     Client *from;
     std::string toRet;
 
-    if (datas.size() == 1) {
+    if (datas.size() == 1) { // exporter dans une fonction
         Channel chan;
         try {
             chan = findChannelWithName(datas[0]);
@@ -207,6 +210,7 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
         catch (std::runtime_error& e)
         {
             std::cout << e.what() << std::endl;
+            return;
         }
         servSendMessageToClient(toRet, *c);
         return ;

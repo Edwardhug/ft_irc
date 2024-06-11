@@ -65,6 +65,7 @@ public:
     bool nickAlreadyExist(std::string &nick);
     bool verifyNick(std::string &nick);
     void setUsername(int fdSender, std::string& buff);
+    void RPL_JOIN(Client& client, std::string& channel);
 };
 
 #endif

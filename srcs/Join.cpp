@@ -3,10 +3,10 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include "../includes/lib.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 #include <cstdio>
 #include <cstring>
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 
 void    Server::sendMessageToChannel(std::string channelName, std::string message) {
     Channel &channel = findChannelWithName(channelName);
@@ -14,30 +14,30 @@ void    Server::sendMessageToChannel(std::string channelName, std::string messag
 }
 
 void	Server::sendConfirmation(std::deque<std::string> data, Client &client) {
-	std::string joinMsg = ":" + client.getNick() + " JOIN " + data[1] + "\r\n"; // envoie au nouveau client le message de join et ajoute le client au channel
-    sendMessageToChannel(data[1], joinMsg);
-    std::string topicMsg = ":server 332 " + client.getNick() + " " + data[1] + " :Welcome to the new channel " + data[1] + "\r\n";
-    if (!servSendMessageToClient(topicMsg, client))
-        return ;
+    RPL_JOIN(client, data[1]);
+    if (!RLP_JOINTOPIC(client, data[1]))
+        return;
     std::string nameList = ":server 353 " + client.getNick() + " = " + data[1] + " :"; // envoie au client la liste des noms des clients dans le channel
-    for (size_t i = 0; i < _vecChannel.size(); ++i) {
-        if (_vecChannel[i].getName() == data[1]) {
+    for (size_t i = 0; i < _vecChannel.size(); ++i)
+    {
+        if (_vecChannel[i].getName() == data[1])
+        {
             std::deque<Client*> vecClient = _vecChannel[i].getVecClient();
-            for (size_t j = 0; j < vecClient.size(); ++j) {
+            for (size_t j = 0; j < vecClient.size(); ++j)
+            {
                 if (_vecChannel[i].checkOperator(*vecClient[j]) == true)
                     nameList += "@" + vecClient[j]->getNick() + " ";
                 else
                     nameList += vecClient[j]->getNick() + " ";
             }
-            nameList += "\r\n"; // ? peut etre un soucis avec les nom qui apparaisse 2 fois mais ca a pas l'air d'etre un probleme
+            nameList += "\r\n";
             if (!servSendMessageToClient(nameList, client))
                 return ;
             break;
         }
     }
     std::string endOfNamesMsg = ":server 366 " + client.getNick() + " " + data[1] + " :End of /NAMES list\r\n";
-    if (!servSendMessageToClient(endOfNamesMsg, client))
-        return ;
+    servSendMessageToClient(endOfNamesMsg, client);
 }
 
 //=====================JOIN============================
@@ -113,7 +113,6 @@ void	Server::splitForJoin(std::string buff, int fdSender)
         std::cout << e.what() << std::endl;
         return ;
     }
-    std::cout << GREEN << fdSender << " " << client->getFdClient() << RESET << std::endl;
     data = split(buff, ' ');
     if (data.size() < 2)
     {

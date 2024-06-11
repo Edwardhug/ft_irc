@@ -1,5 +1,6 @@
 #include "../includes/Server.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
+
 void Server::inviteClient(std::string &buff, int fdSender)
 {
     std::string data = buff.substr(buff.find("INVITE") + 7);
@@ -17,47 +18,39 @@ void Server::inviteClient(std::string &buff, int fdSender)
     {
         return ERR_NEEDMOREPARAMS(*from, "INVITE");
     }
-    std::string newClientNick = datas[0];
-    std::string channel = datas[1];
-    Channel *chToFind = NULL;
-    for (size_t i = 0; i < _vecChannel.size(); i++)
+    Channel *chToFind;
+    try
     {
-        if (_vecChannel[i].getName() == channel)
-        {
-            chToFind = &_vecChannel[i];
-            break;
-        }
+        chToFind = &findChannelWithName(datas[1]);
     }
-    if (chToFind == NULL)
+    catch (std::runtime_error& e)
     {
-        return ERR_NOSUCHCHANNEL(*from, channel);
+        std::cout << RED << e.what() << RESET << std::endl;
+        return ERR_NOSUCHCHANNEL(*from, datas[1]);
     }
     if (!chToFind->clientInChannel(*from))
     {
-        return ERR_NOTONCHANNEL(*from, channel);
+        return ERR_NOTONCHANNEL(*from, datas[1]);
     }
     if (chToFind->checkPerm('i') && !chToFind->checkOperator(*from))
     {
-        return ERR_CHANOPRIVSNEEDED(*from, channel);
+        return ERR_CHANOPRIVSNEEDED(*from, datas[1]);
     }
-    Client *newClient = NULL;
-    for (size_t i = 0; i < _vecClient.size(); i++)
+    Client *newClient;
+    try
     {
-        if (_vecClient[i].getNick() == newClientNick)
-        {
-            newClient = &_vecClient[i];
-            break;
-        }
+        newClient = &findClientWithNick(datas[0]);
     }
-    if (newClient == NULL)
+    catch (std::runtime_error& e)
     {
-        return ERR_WASNOSUCHNICK(*from, newClientNick);
+        std::cout << RED << e.what() << RESET << std::endl;
+        return ERR_WASNOSUCHNICK(*from, datas[0]);
     }
     if (chToFind->clientInChannel(*newClient))
     {
-        return ERR_USERONCHANNEL(*from, newClientNick, channel);
+        return ERR_USERONCHANNEL(*from, datas[0], datas[1]);
     }
     chToFind->addClientInvited(newClient);
-    RPL_INVITING(*from, *newClient, channel);
+    RPL_INVITING(*from, *newClient, datas[1]);
 }
 

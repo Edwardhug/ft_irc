@@ -16,14 +16,14 @@ SRCS =	main.cpp \
 		PrivateMsg.cpp \
 		Password.cpp \
 		Find.cpp \
-		Error.cpp \
+		ErrorAndReply.cpp \
 		Name.cpp \
 
 INCLUDE =	lib.hpp \
 			Client.hpp \
 			Server.hpp \
 			Channel.hpp \
-			Error.hpp \
+			ErrorAndReply.hpp \
 
 OBJS = $(SRCS:%.cpp=$(PATH_OBJS)%.o)
 

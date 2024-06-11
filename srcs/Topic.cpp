@@ -1,6 +1,6 @@
 #include "../includes/Server.hpp"
 #include "../includes/lib.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 
 
 void	Server::splitForTopic(std::string buff, int fdSender) {
