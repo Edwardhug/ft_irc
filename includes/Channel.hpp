@@ -8,8 +8,11 @@
 #include <iostream>
 #include "../includes/Server.hpp"
 #include "lib.hpp"
+#include "Bot.hpp"
+
 class Client;
 class Server;
+class Bot;
 class Channel {
     private:
     std::string _name;
@@ -20,10 +23,11 @@ class Channel {
     std::map<char, bool> _modes;
     std::string _password;
     unsigned int _maxClient;
+	Bot *_bot;
 
     public:
 	Channel();
-    Channel(std::string name, Client* creator);
+    Channel(std::string name, Client* creator, Bot *bot);
     ~Channel();
     void changeMode(char addOrDel, char mode, Client& from, std::string target);
 	void	addClient(Client *newClient);

@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include "Client.hpp"
 #include "Channel.hpp"
+#include "Bot.hpp"
 class Channel;
 class Client;
 class Server 
@@ -65,6 +66,7 @@ public:
     bool nickAlreadyExist(std::string &nick);
     bool verifyNick(std::string &nick);
     void setUsername(int fdSender, std::string& buff);
+	void sendWeatherRequest(std::string& buff, int fdSender);
 };
 
 #endif

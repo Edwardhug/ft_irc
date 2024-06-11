@@ -2,9 +2,10 @@
 
 Channel::Channel() {}
 
-Channel::Channel(std::string name, Client *creator)
+Channel::Channel(std::string name, Client *creator, Bot *bot)
 {
     this->_name = name;
+	this->_bot = bot;
     this->_clients.push_back(creator);
     this->_operators.push_back(creator);
     this->_modes.insert(std::pair<char, bool>('i', false));
