@@ -12,6 +12,7 @@ class Bot {
 
 	std::string _name;
 	std::string getWeather(std::string city);
+	std::string parseWeatherResponse(const std::string& response);
 
 	public :
 

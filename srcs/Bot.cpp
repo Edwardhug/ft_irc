@@ -2,12 +2,43 @@
 #include "../includes/Server.hpp"
 #include "../includes/lib.hpp"
 #include <curl/curl.h>
+#include <sstream>
+#include <algorithm>
+#include <cstdlib>
 
 Bot::Bot() {
 	this->_name = "Vlad";
 }
 
 Bot::~Bot() {}
+
+std::string Bot::parseWeatherResponse(const std::string& response) {
+    size_t key_pos, start, end;
+
+    // Find city name
+    key_pos = response.find("\"name\"");
+    start = response.find(":", key_pos);
+    end = response.find(",", start);
+    std::string city = response.substr(start + 1, end - start - 1);
+    city.erase(std::remove(city.begin(), city.end(), '\"'), city.end());
+    
+    // Find weather description
+    key_pos = response.find("\"description\"");
+    start = response.find(":", key_pos);
+    end = response.find(",", start);
+    std::string description = response.substr(start + 1, end - start - 1);
+    description.erase(std::remove(description.begin(), description.end(), '\"'), description.end());
+
+    // Find temperature
+    key_pos = response.find("\"temp\"");
+    start = response.find(":", key_pos);
+    end = response.find(",", start);
+    std::string temp_str = response.substr(start + 1, end - start - 1);
+    double temperature = std::strtod(temp_str.c_str(), NULL) - 273.15; // Convert from Kelvin to Celsius
+
+	std::string toRet = "Weather in " + city + ": " + description + ", Temperature: " + ft_ftoa(temperature) + "°C";
+    return toRet;
+}
 
 static size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
     std::string* str = static_cast<std::string*>(userp);
@@ -40,23 +71,29 @@ std::string Bot::getWeather(std::string city) {
 
 void Bot::respondToCommand(std::string city, std::string channel, Client& from) {
     std::string weather = getWeather(city);
-	std::cout<< GREEN << weather << RESET << std::endl;
+	if (weather == "{\"cod\":\"404\",\"message\":\"city not found\"}")
+	{
+		std::string message = ":VladTheRobot!VladTheRobot@server PRIVMSG " + channel + " :City not found.\r\n";
+		send(from.getFdClient(), message.c_str(), message.size(), 0);
+		return ;
+	}
+	std::string parsedMsg = parseWeatherResponse(weather);
+	if (weather.empty()) {
+		weather = "Error: Unable to get weather data";
+	}
 
-    std::string message = ":Server PRIVMSG " + channel + " :" + weather + "\r\n";
+    std::string message = ":VladTheRobot!VladTheRobot@server PRIVMSG " + channel + " :" + parsedMsg + "\r\n";
     send(from.getFdClient(), message.c_str(), message.size(), 0);
-	(void)from;
 }
 
 void	Server::sendWeatherRequest(std::string &buff, int fdSender) {
 	std::deque<std::string> data = splitBuffer(buff, ' ');
-	// Channel channel = findChannelWithName(data[1]); // data[1] = #channel
 	Client from = findClientWithFd(fdSender);
 	if (data.size() != 4){
-		std::string message = ":Server NOTICE " +  data[1] + " :Invalid command.\r\n";
+		std::string message = ":VladTheRobot!VladTheRobot@server PRIVMSG " +  data[1] + " :Invalid command.\r\n";
 		servSendMessageToClient(message, from);
 		return ;}
 	Bot bot;
-	// std::cout << GREEN << data[3] << "."<< RESET << std::endl;
-	bot.respondToCommand(data[3], data[0], from);
+	bot.respondToCommand(data[3], data[1], from);
 	(void)fdSender;
 }

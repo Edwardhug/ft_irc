@@ -113,7 +113,6 @@ void	Server::splitForJoin(std::string buff, int fdSender)
         std::cout << e.what() << std::endl;
         return ;
     }
-    std::cout << GREEN << fdSender << " " << client->getFdClient() << RESET << std::endl;
     data = split(buff, ' ');
     if (data.size() < 2)
     {

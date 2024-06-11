@@ -25,5 +25,6 @@
 	std::deque<std::string> splitAllSpaces(std::string &str);
     bool strIsDigit(std::string &str);
     bool servSendMessageToClient(const std::string &message, Client &client);
+	char	*ft_ftoa(double f);
 
 #endif

@@ -83,3 +83,9 @@ bool servSendMessageToClient(const std::string &message, Client &client)
     }
     return true;
 }
+
+char *ft_ftoa(double f) {
+	char *buf = new char[100];
+	sprintf(buf, "%f", f);
+	return buf;
+}
