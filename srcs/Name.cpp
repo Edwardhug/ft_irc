@@ -49,7 +49,7 @@ bool    Server::nickAlreadyExist(std::string& nick)
 void    Server::setUsername(int fdSender, std::string& buff)
 {
     buff = buff.substr(buff.find("USER") + 5);
-    std::vector<std::string>datas = splitBuffer(buff, ' ');
+    std::deque<std::string>datas = splitBuffer(buff, ' ');
     Client *from;
     try
     {

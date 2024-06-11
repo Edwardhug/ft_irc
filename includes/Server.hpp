@@ -1,7 +1,7 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include <vector>
+#include <deque>
 #include <poll.h>
 #include <netinet/in.h>
 #include <exception>
@@ -18,9 +18,9 @@ class Server
     std::string _password;
     int _serverSocketFd;
     static bool _signal;
-    std::vector<Client> _vecClient;
-    std::vector<pollfd> _vecPollFd;	// peut etre besoin de mettre <struct pollfd>
-	std::vector<Channel> _vecChannel;
+    std::deque<Client> _vecClient;
+    std::deque<pollfd> _vecPollFd;	// peut etre besoin de mettre <struct pollfd>
+	std::deque<Channel> _vecChannel;
 
 public:
     Server(int port, std::string password);
@@ -54,7 +54,7 @@ public:
 	void    addClientToChannel(std::string nameChannel, Client &client);
 	Channel &findChannelWithName(std::string name);
 	void	channelMsg(char *buffer, int fdSender);
-	void	sendConfirmation(std::vector<std::string> data, Client &client);
+	void	sendConfirmation(std::deque<std::string> data, Client &client);
 	void    checkPass(const std::string &buff, int fdClient);
     void errorPassword(Client& client);
     char *getMessage(char *buffer);

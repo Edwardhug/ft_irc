@@ -10,17 +10,10 @@
 
 void    Server::sendMessageToChannel(std::string channelName, std::string message) {
     Channel &channel = findChannelWithName(channelName);
-    std::vector<Client*> vecClient = channel.getVecClient();
-    for (size_t i = 0; i < vecClient.size(); ++i) {
-        int clientFd = vecClient[i]->getFdClient();
-        if (clientFd != -1) {
-            if (!servSendMessageToClient(message, *vecClient[i]))
-                return; // TODO Verifier
-        }
-    }
+    channel.msgToChannel(message);
 }
 
-void	Server::sendConfirmation(std::vector<std::string> data, Client &client) {
+void	Server::sendConfirmation(std::deque<std::string> data, Client &client) {
 	std::string joinMsg = ":" + client.getNick() + " JOIN " + data[1] + "\r\n"; // envoie au nouveau client le message de join et ajoute le client au channel
     sendMessageToChannel(data[1], joinMsg);
     std::string topicMsg = ":server 332 " + client.getNick() + " " + data[1] + " :Welcome to the new channel " + data[1] + "\r\n";
@@ -29,13 +22,12 @@ void	Server::sendConfirmation(std::vector<std::string> data, Client &client) {
     std::string nameList = ":server 353 " + client.getNick() + " = " + data[1] + " :"; // envoie au client la liste des noms des clients dans le channel
     for (size_t i = 0; i < _vecChannel.size(); ++i) {
         if (_vecChannel[i].getName() == data[1]) {
-            std::vector<Client*> vecClient = _vecChannel[i].getVecClient();
+            std::deque<Client*> vecClient = _vecChannel[i].getVecClient();
             for (size_t j = 0; j < vecClient.size(); ++j) {
                 if (_vecChannel[i].checkOperator(*vecClient[j]) == true)
                     nameList += "@" + vecClient[j]->getNick() + " ";
                 else
                     nameList += vecClient[j]->getNick() + " ";
-               // nameList += vecClient[j]->getNick() + " ";
             }
             nameList += "\r\n"; // ? peut etre un soucis avec les nom qui apparaisse 2 fois mais ca a pas l'air d'etre un probleme
             if (!servSendMessageToClient(nameList, client))
@@ -110,7 +102,7 @@ void	Server::splitForJoin(std::string buff, int fdSender)
     if (isValidName(buff) == false) {
         return;
     }
-	std::vector<std::string> data;
+	std::deque<std::string> data;
 	Client *client;
     try
     {
@@ -121,6 +113,7 @@ void	Server::splitForJoin(std::string buff, int fdSender)
         std::cout << e.what() << std::endl;
         return ;
     }
+    std::cout << GREEN << fdSender << " " << client->getFdClient() << RESET << std::endl;
     data = split(buff, ' ');
     if (data.size() < 2)
     {
@@ -184,7 +177,7 @@ void Server::channelMsg(char *buffer, int fdSender) {
     std::string channelName = findChannelName(buffer);
     Channel channel = findChannelWithName(channelName);
     std::string fullMessage = ":" + senderClient->getNick() + "!" + senderClient->getNick() + "@server PRIVMSG " + channelName + " :" + message + "\r\n";
-    std::vector<Client*> vecClient = channel.getVecClient();
+    std::deque<Client*> vecClient = channel.getVecClient();
     if (channel.clientInChannel(*senderClient) == false) {
         return ERR_NOTONCHANNEL(*senderClient, channelName);
     }

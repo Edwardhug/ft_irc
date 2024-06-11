@@ -2,7 +2,7 @@
 # define LIB_HPP
 #include <iostream>
 #include <cctype>
-#include <vector>
+#include <deque>
 #include <string>
 #include <sstream>
 #include "../includes/Client.hpp"
@@ -20,9 +20,9 @@
 
 	void	signalHandler(int signum);
 	int		ft_atoi(const char* str);
-    std::vector<std::string> split(const std::string &buffer, char delimiter);
-    std::vector<std::string> splitBuffer(const std::string &buffer, char delimiter);
-	std::vector<std::string> splitAllSpaces(std::string &str);
+    std::deque<std::string> split(const std::string &buffer, char delimiter);
+    std::deque<std::string> splitBuffer(const std::string &buffer, char delimiter);
+	std::deque<std::string> splitAllSpaces(std::string &str);
     bool strIsDigit(std::string &str);
     bool servSendMessageToClient(const std::string &message, Client &client);
 

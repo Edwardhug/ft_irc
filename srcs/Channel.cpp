@@ -40,7 +40,7 @@ void    Channel::addClientInvited(Client *newClient)
     _clientsInvited.push_back(newClient);
 }
 
-std::vector<Client*> Channel::getVecClient() {
+std::deque<Client*> Channel::getVecClient() {
 	return (_clients);
 }
 

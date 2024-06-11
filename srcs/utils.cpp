@@ -1,7 +1,7 @@
 #include "lib.hpp"
 
-std::vector<std::string> splitAllSpaces(std::string &str) {
-	std::vector<std::string> data;
+std::deque<std::string> splitAllSpaces(std::string &str) {
+	std::deque<std::string> data;
 	std::string word;
 	std::istringstream iss(str);
 	while (iss >> word) {
@@ -10,8 +10,8 @@ std::vector<std::string> splitAllSpaces(std::string &str) {
 	return data;
 }
 
-std::vector<std::string> splitBuffer(const std::string& str, char delimiter) {
-    std::vector<std::string> tokens;
+std::deque<std::string> splitBuffer(const std::string& str, char delimiter) {
+    std::deque<std::string> tokens;
     std::string token;
     std::istringstream tokenStream(str);
 
@@ -21,8 +21,8 @@ std::vector<std::string> splitBuffer(const std::string& str, char delimiter) {
     return tokens;
 }
 
-std::vector<std::string> split(const std::string& str, char delimiter) {
-    std::vector<std::string> tokens;
+std::deque<std::string> split(const std::string& str, char delimiter) {
+    std::deque<std::string> tokens;
     std::string token;
     std::istringstream tokenStream(str);
 

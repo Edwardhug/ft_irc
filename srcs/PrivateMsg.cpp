@@ -27,7 +27,7 @@ void    Server::sendmsg(const std::string &from, const std::string &to, const st
 
 void    Server::splitForPrivMsg(const std::string &buff, int fdSender)
 {
-    std::vector<std::string> data;
+    std::deque<std::string> data;
     data = split(buff, ' ');
     Client *from;
     try {

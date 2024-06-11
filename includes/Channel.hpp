@@ -2,7 +2,7 @@
 #define CHANNEL_HPP
 
 #include <string>
-#include <vector>
+#include <deque>
 #include <map>
 #include "Client.hpp"
 #include <iostream>
@@ -14,9 +14,9 @@ class Channel {
     private:
     std::string _name;
     std::string _topic;
-    std::vector<Client*> _clients;
-    std::vector<Client*> _operators;
-    std::vector<Client*> _clientsInvited;
+    std::deque<Client*> _clients;
+    std::deque<Client*> _operators;
+    std::deque<Client*> _clientsInvited;
     std::map<char, bool> _modes;
     std::string _password;
     unsigned int _maxClient;
@@ -28,7 +28,7 @@ class Channel {
     void changeMode(char addOrDel, char mode, Client& from, std::string target);
 	void	addClient(Client *newClient);
     std::string getName() const;
-	std::vector<Client*> getVecClient();
+	std::deque<Client*> getVecClient();
     void deleteOperator(std::string target, Client& from);
     void addOperator(std::string target, Client& from);
     void setTopic(std::string topic);
@@ -45,7 +45,7 @@ class Channel {
     bool checkModesForJoin(Client& client);
     bool checkOperatorWithName(std::string nick);
     void displayFDS();
-    void channelMsg(std::string msg, int fdSender);
+    void msgToChannel(std::string msg);
     std::map<char, bool> getModes();
     unsigned int getMaxClient();
 };

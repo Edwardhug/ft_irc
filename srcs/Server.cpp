@@ -62,7 +62,7 @@ void Server::clearClient(int fd) //? Peut etre closes les fds
 
 void Server::closeFds()
 {
-    std::vector<Client>::iterator it;
+    std::deque<Client>::iterator it;
 
     for (it = _vecClient.begin(); it != _vecClient.end(); it++)
     {
@@ -176,7 +176,7 @@ void	Server::readReceivedData(int fd)
         completeBuffer += buffer;
         if (completeBuffer.find('\n') != std::string::npos)
         {
-            std::vector<std::string> splittedBuffer = splitBuffer(completeBuffer, '\n');
+            std::deque<std::string> splittedBuffer = splitBuffer(completeBuffer, '\n');
             completeBuffer.erase();
             for (size_t i = 0; i < splittedBuffer.size(); i++)
             {

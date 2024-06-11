@@ -12,7 +12,7 @@ void Server::inviteClient(std::string &buff, int fdSender)
         std::cout << e.what() << std::endl;
         return ;
     }
-    std::vector<std::string> datas = split(data, ' ');
+    std::deque<std::string> datas = split(data, ' ');
     if (datas.size() < 2)
     {
         return ERR_NEEDMOREPARAMS(*from, "INVITE");

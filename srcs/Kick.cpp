@@ -3,7 +3,7 @@
 #include "../includes/lib.hpp"
 
 void	Server::kickClient(std::string &buff, int fdSender) {
-	std::vector<std::string> data;
+	std::deque<std::string> data;
 	Client *client;
     try{
         client = &findClientWithFd(fdSender);

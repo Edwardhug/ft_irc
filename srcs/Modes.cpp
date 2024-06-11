@@ -25,27 +25,28 @@ std::string getModesActivate(Channel chan)
 
 void Channel::deleteOperator(std::string target, Client& from)
 {
-    std::vector<Client*>::iterator it;
+    std::deque<Client*>::iterator it;
     for (it = _operators.begin(); it != _operators.end(); it++)
     {
         if ((*it)->getNick() == target)
         {
             _operators.erase(it);
             std::string notif = ":" + from.getNick() + " MODE " + _name + " -o " + target + "\r\n";
-            channelMsg(notif, from.getFdClient());
+            msgToChannel(notif);
             break ;
         }
     }
 }
 
-void    Channel::channelMsg(std::string msg, int fdSender)
+void    Channel::msgToChannel(std::string msg)
 {
+    //std::cout << RED << _clients.size() << RESET << std::endl;
     for (size_t i = 0; i < _clients.size(); i++)
     {
+        //std::cout << BLUE << i << " " << _clients[i]->getNick() << RESET <<  std::endl;
         if (!servSendMessageToClient(msg, *_clients[i]))
             return;
     }
-    (void)fdSender;
 }
 
 std::string removeSpaces(std::string str)
@@ -71,7 +72,7 @@ void Channel::addOperator(std::string target, Client& from)
         {
             _operators.push_back(_clients[i]);
             std::string notif = ":" + from.getNick() + " MODE " + _name + " +o " + target + "\r\n";
-            channelMsg(notif, from.getFdClient());
+            msgToChannel(notif);
             break ;
         }
     }
@@ -134,7 +135,7 @@ void    Channel::addModes(char mode, Client& from, std::string target)
             notif += " " + target;
         }
         notif += "\r\n";
-        channelMsg(notif, from.getFdClient());
+        msgToChannel(notif);
     }
 }
 
@@ -159,7 +160,7 @@ void Channel::delModes(char mode, Client& from, std::string target)
     {
         it->second = false;
         std::string notif = ":" + from.getNick() + " MODE " + _name + " -" + mode + "\r\n";
-        channelMsg(notif, from.getFdClient());
+        msgToChannel(notif);
     }
 }
 
@@ -183,7 +184,7 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
 {
     std::string target;
     std::string data = buff.substr(buff.find("MODE") + 5); // TODO : Split et enlever le premier
-    std::vector<std::string> datas = split(data, ' ');
+    std::deque<std::string> datas = split(data, ' ');
     Client *from;
     std::string toRet;
 
