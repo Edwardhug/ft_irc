@@ -1,5 +1,5 @@
 #include "../includes/lib.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 
 //===================PRIVMSG========================
 void    Server::sendmsg(const std::string &from, const std::string &to, const std::string& message) // il n'affiche pas qui a envoyer le message
@@ -20,8 +20,9 @@ void    Server::sendmsg(const std::string &from, const std::string &to, const st
         std::cerr << e.what() << std::endl;
         return ERR_NOSUCHNICK(*clientFrom, const_cast<std::string&>(to));
     }
-    std::string completeMessage = ":" + from + " PRIVMSG " + to + " :" + message + "\r\n";
-    servSendMessageToClient(completeMessage, *clientTo);
+	RPL_PRVMSG(*clientTo, from, to, message);
+//    std::string completeMessage = ":" + from + " PRIVMSG " + to + " :" + message + "\r\n";
+//    servSendMessageToClient(completeMessage, *clientTo);
 }
 
 void    Server::splitForPrivMsg(const std::string &buff, int fdSender)

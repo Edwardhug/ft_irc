@@ -16,7 +16,7 @@ SRCS =	main.cpp \
 		PrivateMsg.cpp \
 		Password.cpp \
 		Find.cpp \
-		Error.cpp \
+		ErrorAndReply.cpp \
 		Name.cpp \
 #				Bot.cpp \
 
@@ -24,7 +24,7 @@ INCLUDE =	lib.hpp \
 			Client.hpp \
 			Server.hpp \
 			Channel.hpp \
-			Error.hpp \
+			ErrorAndReply.hpp \
 #			Bot.hpp \
 
 OBJS = $(SRCS:%.cpp=$(PATH_OBJS)%.o)

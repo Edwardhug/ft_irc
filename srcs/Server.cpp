@@ -3,7 +3,7 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include "../includes/lib.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 #include <cstdio>
 
 Server::Server(int port, std::string password) : _port(port), _password(password)
@@ -66,12 +66,10 @@ void Server::closeFds()
 
     for (it = _vecClient.begin(); it != _vecClient.end(); it++)
     {
-        //? Ecrire un message 
         close(it->getFdClient());
     }
     if (_serverSocketFd != -1)
     {
-        //? Ecrire un message
         close(_serverSocketFd);
     }
 }
@@ -185,9 +183,6 @@ void	Server::readReceivedData(int fd)
 	}
 }
 
-//===================NICK===========================
-
-//====================================================
 void    Server::operatorCanals(const char *buffer, int fdSender)
 {
     std::string buff = static_cast<std::string>(buffer);

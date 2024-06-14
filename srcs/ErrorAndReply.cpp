@@ -1,4 +1,4 @@
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 
 void ERR_NOSUCHCHANNEL(Client& client, std::string channel)
 {
@@ -137,4 +137,10 @@ void ERR_USERNOTINCHANNEL(Client& client, std::string &nick, std::string channel
 {
     std::string err = ":server 441 " + client.getNick() + " " + nick + " " + channel + " :They aren't on that channel\r\n";
     servSendMessageToClient(err, client);
+}
+
+void RPL_PRVMSG(Client& clientTo, std::string from, std::string to, std::string message)
+{
+	std::string rpl = ":" + from + " PRIVMSG " + to + " :" + message + "\r\n";
+	servSendMessageToClient(rpl, clientTo);
 }

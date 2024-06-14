@@ -3,10 +3,9 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include "../includes/lib.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 #include <cstdio>
 #include <cstring>
-#include "../includes/Error.hpp"
 
 void    Server::sendMessageToChannel(std::string channelName, std::string message) {
     Channel &channel = findChannelWithName(channelName);
@@ -14,12 +13,12 @@ void    Server::sendMessageToChannel(std::string channelName, std::string messag
 }
 
 void	Server::sendConfirmation(std::deque<std::string> data, Client &client) {
-	std::string joinMsg = ":" + client.getNick() + " JOIN " + data[1] + "\r\n"; // envoie au nouveau client le message de join et ajoute le client au channel
+	std::string joinMsg = ":" + client.getNick() + " JOIN " + data[1] + "\r\n";
     sendMessageToChannel(data[1], joinMsg);
     std::string topicMsg = ":server 332 " + client.getNick() + " " + data[1] + " :Welcome to the new channel " + data[1] + "\r\n";
     if (!servSendMessageToClient(topicMsg, client))
         return ;
-    std::string nameList = ":server 353 " + client.getNick() + " = " + data[1] + " :"; // envoie au client la liste des noms des clients dans le channel
+    std::string nameList = ":server 353 " + client.getNick() + " = " + data[1] + " :";
     for (size_t i = 0; i < _vecChannel.size(); ++i) {
         if (_vecChannel[i].getName() == data[1]) {
             std::deque<Client*> vecClient = _vecChannel[i].getVecClient();
@@ -29,7 +28,7 @@ void	Server::sendConfirmation(std::deque<std::string> data, Client &client) {
                 else
                     nameList += vecClient[j]->getNick() + " ";
             }
-            nameList += "\r\n"; // ? peut etre un soucis avec les nom qui apparaisse 2 fois mais ca a pas l'air d'etre un probleme
+            nameList += "\r\n";
             if (!servSendMessageToClient(nameList, client))
                 return ;
             break;
@@ -133,10 +132,22 @@ void	Server::splitForJoin(std::string buff, int fdSender)
             return ;
         if (channel.checkPerm('k'))
         {
+			std::cout << RED << "je passe\n" << RESET;
             if (data.size() < 3)
-                return ERR_BADCHANNELKEY(*client, data[1]);
+			{
+				std::cout << RED << "ici !!\n" << RESET ;
+				return ERR_BADCHANNELKEY(*client, data[1]);
+			}
+			if (data[2].find(' ') != std::string::npos)
+				data[2].erase(data[2].find(' '));
             if (data[2] != channel.getPass())
-                return ERR_BADCHANNELKEY(*client, data[1]);
+			{
+				for (size_t i = 0; i < data[2].size(); i++)
+					std::cout << GREEN << static_cast<int>(data[2][i]) << " ";
+				std::cout << '\n' << RESET;
+				std::cout << RED << data[2] << " " << data[2].size() << " " << channel.getPass() << std::endl << RESET;
+				return ERR_BADCHANNELKEY(*client, data[1]);
+			}
         }
 		addClientToChannel(data[1], *client);
 		client->changeChannelBool(true);

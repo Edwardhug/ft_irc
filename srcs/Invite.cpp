@@ -1,5 +1,6 @@
 #include "../includes/Server.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
+
 void Server::inviteClient(std::string &buff, int fdSender)
 {
     std::string data = buff.substr(buff.find("INVITE") + 7);

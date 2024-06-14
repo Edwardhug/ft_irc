@@ -1,5 +1,5 @@
 #include "../includes/Channel.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 
 std::string getModesActivate(Channel chan)
 {
@@ -91,7 +91,7 @@ void    Channel::addModes(char mode, Client& from, std::string target)
     it = _modes.find(mode);
     if (it == _modes.end())
     {
-        ERR_NEEDMOREPARAMS(from, "MODE"); //todo mettre le code d'erreur de sylvain
+        ERR_NEEDMOREPARAMS(from, "MODE");
         return;
     }
     if (it->second) {
@@ -181,7 +181,7 @@ void Channel::changeMode(char addOrDel, char mode, Client& from, std::string tar
 void    Server::splitForMode(const std::string &buff, int fdSender)
 {
     std::string target;
-    std::string data = buff.substr(buff.find("MODE") + 5); // TODO : Split et enlever le premier
+    std::string data = buff.substr(buff.find("MODE") + 5);
     std::deque<std::string> datas = split(data, ' ');
     Client *from;
     std::string toRet;

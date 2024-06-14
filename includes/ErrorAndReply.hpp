@@ -28,4 +28,5 @@ void RPL_AWAY(Client& client, std::string &nick, std::string message);
 void ERR_NOSUCHNICK(Client& client, std::string &nick);
 void ERR_NOTEXTTOSEND(Client &client);
 void ERR_USERNOTINCHANNEL(Client& client, std::string &nick, std::string channel);
+void RPL_PRVMSG(Client& clientTo, std::string from, std::string to, std::string message);
 #endif

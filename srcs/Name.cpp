@@ -1,5 +1,5 @@
 #include "../includes/Server.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 void    Server::attributeNickName(int fd, std::string& buff)
 {
     std::string newNick = buff.substr(buff.find("NICK") + 5);
