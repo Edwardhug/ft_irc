@@ -21,8 +21,7 @@ void    Server::sendmsg(const std::string &from, const std::string &to, const st
         return ERR_NOSUCHNICK(*clientFrom, const_cast<std::string&>(to));
     }
     std::string completeMessage = ":" + from + " PRIVMSG " + to + " :" + message + "\r\n";
-    servSendMessageToClient(completeMessage, *clientFrom);
-    (void)clientTo;
+    servSendMessageToClient(completeMessage, *clientTo);
 }
 
 void    Server::splitForPrivMsg(const std::string &buff, int fdSender)

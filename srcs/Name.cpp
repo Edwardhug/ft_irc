@@ -60,7 +60,6 @@ void    Server::setUsername(int fdSender, std::string& buff)
         std::cout << e.what() << std::endl;
         return ;
     }
-    std::cout << RED << datas.size() << RESET << std::endl;
     if (datas.size() < 4 || datas[0].empty() || datas[3].empty())
     {
         return ERR_NEEDMOREPARAMS(*from, "USER");

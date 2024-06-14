@@ -18,7 +18,7 @@ std::string getModesActivate(Channel chan)
         oss << maxClient;
         res += " " + oss.str();
     }
-    res += "\r\n"; //todo faudra voir avec sylvain si c'est bien ca qu'il faut renvoyer
+    res += "\r\n";
     return res;
 }
 
@@ -40,10 +40,8 @@ void Channel::deleteOperator(std::string target, Client& from)
 
 void    Channel::msgToChannel(std::string msg)
 {
-    //std::cout << RED << _clients.size() << RESET << std::endl;
     for (size_t i = 0; i < _clients.size(); i++)
     {
-        //std::cout << BLUE << i << " " << _clients[i]->getNick() << RESET <<  std::endl;
         if (!servSendMessageToClient(msg, *_clients[i]))
             return;
     }

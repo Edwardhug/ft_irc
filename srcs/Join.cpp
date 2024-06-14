@@ -120,8 +120,8 @@ void	Server::splitForJoin(std::string buff, int fdSender)
     }
 	if (data.size() >= 2 && channelExist(data[1]) == false)
     {
-		Bot *bot = new Bot();
-		Channel newChannel(data[1], client, bot);
+//		Bot *bot = new Bot();
+		Channel newChannel(data[1], client, NULL);
 		addChannel(newChannel);
 		client->changeChannelBool(true);
 		client->setChannel(findChannelWithName(data[1]));
