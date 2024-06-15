@@ -59,7 +59,7 @@ std::string Bot::parseWeatherResponse(const std::string& response) {
 	char *temp = ft_ftoa(temperature);
 
 	std::string toRet = "Weather in " + city + ": " + description + ", Temperature: " + temp + "°C";
-	// delete temp;
+	delete [] temp;
     return toRet;
 }
 
