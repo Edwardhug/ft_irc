@@ -18,14 +18,14 @@ SRCS =	main.cpp \
 		Find.cpp \
 		ErrorAndReply.cpp \
 		Name.cpp \
-#				Bot.cpp \
+		Bot.cpp \
 
 INCLUDE =	lib.hpp \
 			Client.hpp \
 			Server.hpp \
 			Channel.hpp \
 			ErrorAndReply.hpp \
-#			Bot.hpp \
+			Bot.hpp \
 
 OBJS = $(SRCS:%.cpp=$(PATH_OBJS)%.o)
 

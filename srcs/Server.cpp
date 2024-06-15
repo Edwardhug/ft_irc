@@ -202,10 +202,10 @@ void    Server::operatorCanals(const char *buffer, int fdSender)
         return ;
     }
     if (from->getPass()) {
-//		if (buff.find("VLAD") != std::string::npos && buff.find("PRIVMSG") != std::string::npos && buff.size() > 8 && buff[8] == '#') {
-//			sendWeatherRequest(buff, fdSender);
-//		}
-        if (buff.find("PRIVMSG") != std::string::npos && buff.size() > 8 && buff[8] == '#') {
+		if (buff.find("VLAD") != std::string::npos && buff.find("PRIVMSG") != std::string::npos && buff.size() > 8 && buff[8] == '#') {
+			sendWeatherRequest(buff, fdSender);
+		}
+        else if (buff.find("PRIVMSG") != std::string::npos && buff.size() > 8 && buff[8] == '#') {
             channelMsg(const_cast<char *>(buffer), fdSender);
         } else if (buff.find("NICK") != std::string::npos) {
             attributeNickName(fdSender, buff);

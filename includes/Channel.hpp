@@ -27,7 +27,7 @@ class Channel {
 
     public:
 	Channel();
-    Channel(std::string name, Client* creator, Bot *bot);
+    Channel(std::string name, Client* creator, Bot bot);
     ~Channel();
     void changeMode(char addOrDel, char mode, Client& from, std::string target);
 	void	addClient(Client *newClient);
