@@ -48,11 +48,12 @@ class Channel {
     std::string getPass();
     bool checkModesForJoin(Client& client);
     bool checkOperatorWithName(std::string nick);
-    void displayFDS();
     void msgToChannel(std::string msg);
     std::map<char, bool> getModes();
     unsigned int getMaxClient();
 	bool	clientInChannelName(std::string& name);
+    void removeClientFd(int fd);
+    bool	clientInChannelFd(int fd);
 };
 
 #endif

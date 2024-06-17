@@ -57,6 +57,12 @@ void Server::clearClient(int fd)
             break ;
         }
     }
+    for (size_t i = 0; i < _vecChannel.size(); i++)
+    {
+        if (_vecChannel[i].clientInChannelFd(fd)) { // clientInChannel ne marche pas, fd different jsp pourquoi 
+            _vecChannel[i].removeClientFd(fd);
+        }
+    }
 }
 
 

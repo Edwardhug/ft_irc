@@ -120,6 +120,15 @@ bool	Channel::clientInChannelName(std::string& name)
 	return false;
 }
 
+bool	Channel::clientInChannelFd(int fd)
+{
+    for (size_t i = 0; i < _clients.size(); i++)
+    {
+        if (_clients[i]->getFdClient() == fd)
+            return true;
+    }
+    return false;
+}
 
 bool Channel::clientIsInvited(Client &client)
 {
@@ -135,3 +144,17 @@ std::string Channel::getPass()
 {
     return _password;
 }
+
+
+void Channel::removeClientFd(int fd)
+{
+    for (size_t i = 0; i < _clients.size(); i++)
+    {
+        if (_clients[i]->getFdClient() == fd)
+        {
+            std::cout << RED << _clients[i]->getNick() << RESET << std::endl;
+            _clients.erase(_clients.begin() + i);
+        }
+    }
+}
+
