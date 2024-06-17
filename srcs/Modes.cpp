@@ -1,12 +1,12 @@
 #include "../includes/Channel.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 
 std::string getModesActivate(Channel chan)
 {
     std::map<char, bool> modes = chan.getModes();
     unsigned int maxClient = chan.getMaxClient();
     std::map<char, bool>::iterator it;
-    std::string res = ":Serveur NOTICE " + chan.getName() + " Active modes are :+";
+    std::string res = ":Server NOTICE " + chan.getName() + " Active modes are :+";
     for (it = modes.begin(); it != modes.end(); it++)
     {
         if (it->second)
@@ -18,7 +18,10 @@ std::string getModesActivate(Channel chan)
         oss << maxClient;
         res += " " + oss.str();
     }
-    res += "\r\n"; //todo faudra voir avec sylvain si c'est bien ca qu'il faut renvoyer
+    res += "\r\n";
+
+	if (res.compare(":Server NOTICE " + chan.getName() + " Active modes are :+\r\n") == 0)
+		return ":Server NOTICE " + chan.getName() + " No active modes\r\n";
     return res;
 }
 
@@ -33,17 +36,16 @@ void Channel::deleteOperator(std::string target, Client& from)
             _operators.erase(it);
             std::string notif = ":" + from.getNick() + " MODE " + _name + " -o " + target + "\r\n";
             msgToChannel(notif);
-            break ;
+            return ;
         }
     }
+	return ERR_USERNOTINCHANNEL(from, target, _name);
 }
 
 void    Channel::msgToChannel(std::string msg)
 {
-    //std::cout << RED << _clients.size() << RESET << std::endl;
     for (size_t i = 0; i < _clients.size(); i++)
     {
-        //std::cout << BLUE << i << " " << _clients[i]->getNick() << RESET <<  std::endl;
         if (!servSendMessageToClient(msg, *_clients[i]))
             return;
     }
@@ -62,6 +64,10 @@ std::string removeSpaces(std::string str)
 
 void Channel::addOperator(std::string target, Client& from)
 {
+	if (!clientInChannelName(target))
+	{
+		return ERR_USERNOTINCHANNEL(from, target, _name);
+	}
     if (checkOperatorWithName(target))
     {
         return ERR_OPEALREADY(from, target, _name);
@@ -93,7 +99,7 @@ void    Channel::addModes(char mode, Client& from, std::string target)
     it = _modes.find(mode);
     if (it == _modes.end())
     {
-        ERR_NEEDMOREPARAMS(from, "MODE"); //todo mettre le code d'erreur de sylvain
+        ERR_NEEDMOREPARAMS(from, "MODE");
         return;
     }
     if (it->second) {
@@ -127,6 +133,10 @@ void    Channel::addModes(char mode, Client& from, std::string target)
                 return ERR_NEEDMOREPARAMSCHANNEL(from, _name, "MODE +l");
             }
             _maxClient = ft_atoi(target.c_str());
+			if (_maxClient < 2)
+				return ERR_NOTENOUGHPLACE(from, _name);
+			if (_maxClient < _clients.size())
+				return ERR_LESSTHANACTIVEUSER(from, _name);
         }
         _modes[mode] = true;
         std::string notif = ":" + from.getNick() + " MODE " + _name + " +" + mode;
@@ -183,9 +193,19 @@ void Channel::changeMode(char addOrDel, char mode, Client& from, std::string tar
 void    Server::splitForMode(const std::string &buff, int fdSender)
 {
     std::string target;
-    std::string data = buff.substr(buff.find("MODE") + 5); // TODO : Split et enlever le premier
-    std::deque<std::string> datas = split(data, ' ');
-    Client *from;
+	Client *from;
+	try {
+		from = &findClientWithFd(fdSender);
+	}
+	catch (std::runtime_error& e)
+	{
+		std::cerr << e.what() << std::endl;
+		return;
+	}
+	if (buff.size() < 5)
+		return ERR_NEEDMOREPARAMS(*from, "MODE");
+    std::string data = buff.substr(buff.find("MODE") + 5);
+    std::deque<std::string> datas = splitBuffer(data, ' ');
     std::string toRet;
 
     if (datas.size() == 1) {
@@ -211,14 +231,7 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
         servSendMessageToClient(toRet, *c);
         return ;
     }
-    try {
-        from = &findClientWithFd(fdSender);
-    }
-    catch (std::runtime_error& e)
-    {
-        std::cerr << e.what() << std::endl;
-        return;
-    }
+
     if (datas.size() == 3)
     {
         target = datas[2];

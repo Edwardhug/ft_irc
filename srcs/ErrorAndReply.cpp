@@ -1,4 +1,4 @@
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 
 void ERR_NOSUCHCHANNEL(Client& client, std::string channel)
 {
@@ -15,7 +15,7 @@ void ERR_NEEDMOREPARAMS(Client& client, std::string fx)
 void ERR_NEEDMOREPARAMSCHANNEL(Client& client, std::string channel, std::string fx)
 {
     std::string err = ":server 461 " + client.getNick() + " " + channel + " " + fx + " :Not enough parameters\r\n";
-    servSendMessageToClient(err, client);
+	servSendMessageToClient(err, client);
 }
 
 void ERR_NOTONCHANNEL(Client& client, std::string channel)
@@ -75,7 +75,7 @@ void RPL_INVITING(Client& from, Client& to, std::string channel)
 
 void RPL_CHANNELMODEIS(Client& client, std::string channel, std::string modes)
 {
-    std::string reply = ":server 324 " + client.getNick() + " " + channel + " " + modes;
+    std::string reply = ":server 324 " + client.getNick() + " " + channel + " " + modes + "\r\n";
     servSendMessageToClient(reply, client);
 }
 
@@ -135,6 +135,30 @@ void ERR_NOTEXTTOSEND(Client &client)
 
 void ERR_USERNOTINCHANNEL(Client& client, std::string &nick, std::string channel)
 {
-    std::string err = ":server 441 " + client.getNick() + " " + nick + " " + channel + " :They aren't on that channel\r\n";
+    std::string err = ":Server NOTICE " + channel + " " + nick + " :They aren't on that channel\r\n";
     servSendMessageToClient(err, client);
+}
+
+void RPL_PRVMSG(Client& clientTo, std::string from, std::string to, std::string message)
+{
+	std::string rpl = ":" + from + " PRIVMSG " + to + " :" + message + "\r\n";
+	servSendMessageToClient(rpl, clientTo);
+}
+
+void ERR_ALREADYNICKED(Client& client)
+{
+	std::string err = ":Server NOTICE " + client.getNick() + " :You already have a nickname\r\n";
+	servSendMessageToClient(err, client);
+}
+
+void ERR_NOTENOUGHPLACE(Client& client, std::string &ch)
+{
+	std::string err = ":Server NOTICE " + ch + " " + client.getNick() + " :Can't be less than 2 (+l)\r\n";
+	servSendMessageToClient(err, client);
+}
+
+void ERR_LESSTHANACTIVEUSER(Client& client, std::string &ch)
+{
+	std::string err = ":Server NOTICE " + ch + " " + client.getNick() + " :Can't be less than the number of client in the channel (+l)\r\n";
+	servSendMessageToClient(err, client);
 }

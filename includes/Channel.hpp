@@ -27,7 +27,7 @@ class Channel {
 
     public:
 	Channel();
-    Channel(std::string name, Client* creator, Bot *bot);
+    Channel(std::string name, Client* creator, Bot bot);
     ~Channel();
     void changeMode(char addOrDel, char mode, Client& from, std::string target);
 	void	addClient(Client *newClient);
@@ -52,6 +52,7 @@ class Channel {
     void msgToChannel(std::string msg);
     std::map<char, bool> getModes();
     unsigned int getMaxClient();
+	bool	clientInChannelName(std::string& name);
 };
 
 #endif

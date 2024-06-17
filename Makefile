@@ -16,16 +16,16 @@ SRCS =	main.cpp \
 		PrivateMsg.cpp \
 		Password.cpp \
 		Find.cpp \
-		Error.cpp \
-		Bot.cpp \
+		ErrorAndReply.cpp \
 		Name.cpp \
+		Bot.cpp \
 
 INCLUDE =	lib.hpp \
-			Bot.hpp \
 			Client.hpp \
 			Server.hpp \
 			Channel.hpp \
-			Error.hpp \
+			ErrorAndReply.hpp \
+			Bot.hpp \
 
 OBJS = $(SRCS:%.cpp=$(PATH_OBJS)%.o)
 
@@ -36,7 +36,7 @@ PATH_OBJS = objs/
 all: $(NAME)
 
 $(NAME): $(PATH_OBJS) $(OBJS) $(addprefix $(PATH_INCLUDE), $(INCLUDE))
-	$(CC) $(CFLAG) $(OBJS) -o $(NAME) -L/usr/lib/x86_64-linux-gnu -lcurl
+	$(CC) $(CFLAG) $(OBJS) -o $(NAME)
 
 $(OBJS): $(PATH_OBJS)%.o: $(PATH_SRCS)%.cpp $(addprefix $(PATH_INCLUDE), $(INCLUDE))
 	$(CC) $(CFLAG) -I$(PATH_INCLUDE) -c $< -o $@

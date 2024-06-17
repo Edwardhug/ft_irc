@@ -1,5 +1,5 @@
 #include "../includes/Server.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 #include "../includes/lib.hpp"
 
 void	Server::kickClient(std::string &buff, int fdSender) {

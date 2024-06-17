@@ -5,6 +5,7 @@ Client::Client() : _fdClient(-1), _corrPass(false)
 	_inChannel = false;
     _username = "";
     _realname = "";
+	_asDefNick = false;
 }
 
 Client::~Client() {}
@@ -47,6 +48,16 @@ bool Client::getPass() const
 void Client::setPass()
 {
     this->_corrPass = true;
+}
+
+bool Client::getDefNick()
+{
+	return this->_asDefNick;
+}
+
+void Client::setDefNick()
+{
+	this->_asDefNick = true;
 }
 
 bool	Client::getInChannel() {

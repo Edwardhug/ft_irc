@@ -3,23 +3,31 @@
 #include <fcntl.h>
 #include <arpa/inet.h>
 #include "../includes/lib.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 #include <cstdio>
 #include <cstring>
-#include "../includes/Error.hpp"
 
 void    Server::sendMessageToChannel(std::string channelName, std::string message) {
     Channel &channel = findChannelWithName(channelName);
     channel.msgToChannel(message);
 }
 
-void	Server::sendConfirmation(std::deque<std::string> data, Client &client) {
-	std::string joinMsg = ":" + client.getNick() + " JOIN " + data[1] + "\r\n"; // envoie au nouveau client le message de join et ajoute le client au channel
+void	Server::sendConfirmationJoin(std::deque<std::string> data, Client &client) {
+	std::string joinMsg = ":" + client.getNick() + " JOIN " + data[1] + "\r\n";
     sendMessageToChannel(data[1], joinMsg);
-    std::string topicMsg = ":server 332 " + client.getNick() + " " + data[1] + " :Welcome to the new channel " + data[1] + "\r\n";
+	Channel *ch;
+	try
+	{
+		ch = &findChannelWithName(data[1]);
+	}
+	catch (std::runtime_error &e)
+	{
+		return ERR_NOSUCHCHANNEL(client, data[1]);
+	}
+    std::string topicMsg = ":server 332 " + client.getNick() + " " + data[1] + " " + ch->getTopic() + "\r\n";
     if (!servSendMessageToClient(topicMsg, client))
         return ;
-    std::string nameList = ":server 353 " + client.getNick() + " = " + data[1] + " :"; // envoie au client la liste des noms des clients dans le channel
+    std::string nameList = ":server 353 " + client.getNick() + " = " + data[1] + " :";
     for (size_t i = 0; i < _vecChannel.size(); ++i) {
         if (_vecChannel[i].getName() == data[1]) {
             std::deque<Client*> vecClient = _vecChannel[i].getVecClient();
@@ -29,7 +37,7 @@ void	Server::sendConfirmation(std::deque<std::string> data, Client &client) {
                 else
                     nameList += vecClient[j]->getNick() + " ";
             }
-            nameList += "\r\n"; // ? peut etre un soucis avec les nom qui apparaisse 2 fois mais ca a pas l'air d'etre un probleme
+            nameList += "\r\n";
             if (!servSendMessageToClient(nameList, client))
                 return ;
             break;
@@ -40,6 +48,33 @@ void	Server::sendConfirmation(std::deque<std::string> data, Client &client) {
         return ;
 }
 
+
+void	Server::sendConfirmationCreate(std::deque<std::string> data, Client &client) {
+	std::string joinMsg = ":" + client.getNick() + " JOIN " + data[1] + "\r\n";
+	sendMessageToChannel(data[1], joinMsg);
+	std::string topicMsg = ":server 332 " + client.getNick() + " " + data[1] + " Welcome to the channel : " + data[1] + "\r\n";
+	if (!servSendMessageToClient(topicMsg, client))
+		return ;
+	std::string nameList = ":server 353 " + client.getNick() + " = " + data[1] + " :";
+	for (size_t i = 0; i < _vecChannel.size(); ++i) {
+		if (_vecChannel[i].getName() == data[1]) {
+			std::deque<Client*> vecClient = _vecChannel[i].getVecClient();
+			for (size_t j = 0; j < vecClient.size(); ++j) {
+				if (_vecChannel[i].checkOperator(*vecClient[j]) == true)
+					nameList += "@" + vecClient[j]->getNick() + " ";
+				else
+					nameList += vecClient[j]->getNick() + " ";
+			}
+			nameList += "\r\n";
+			if (!servSendMessageToClient(nameList, client))
+				return ;
+			break;
+		}
+	}
+	std::string endOfNamesMsg = ":server 366 " + client.getNick() + " " + data[1] + " :End of /NAMES list\r\n";
+	if (!servSendMessageToClient(endOfNamesMsg, client))
+		return ;
+}
 //=====================JOIN============================
 
 bool	Server::channelExist(std::string name) {
@@ -120,12 +155,12 @@ void	Server::splitForJoin(std::string buff, int fdSender)
     }
 	if (data.size() >= 2 && channelExist(data[1]) == false)
     {
-		Bot *bot = new Bot();
+		Bot bot;
 		Channel newChannel(data[1], client, bot);
 		addChannel(newChannel);
 		client->changeChannelBool(true);
 		client->setChannel(findChannelWithName(data[1]));
-		sendConfirmation(data, *client);
+		sendConfirmationCreate(data, *client);
 	}
 	else if (data.size() >= 2 && channelExist(data[1]) == true) {
         Channel& channel = findChannelWithName(data[1]);
@@ -134,14 +169,20 @@ void	Server::splitForJoin(std::string buff, int fdSender)
         if (channel.checkPerm('k'))
         {
             if (data.size() < 3)
-                return ERR_BADCHANNELKEY(*client, data[1]);
+			{
+				return ERR_BADCHANNELKEY(*client, data[1]);
+			}
+			if (data[2].find(' ') != std::string::npos)
+				data[2].erase(data[2].find(' '));
             if (data[2] != channel.getPass())
-                return ERR_BADCHANNELKEY(*client, data[1]);
+			{
+				return ERR_BADCHANNELKEY(*client, data[1]);
+			}
         }
 		addClientToChannel(data[1], *client);
 		client->changeChannelBool(true);
 		client->setChannel(findChannelWithName(data[1]));
-		sendConfirmation(data, *client);
+		sendConfirmationJoin(data, *client);
 	}
 }
 //==============================channel msg=============================

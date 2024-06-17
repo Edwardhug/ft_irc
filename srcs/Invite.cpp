@@ -1,17 +1,20 @@
 #include "../includes/Server.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
+
 void Server::inviteClient(std::string &buff, int fdSender)
 {
+	Client *from;
+	try{
+		from = &findClientWithFd(fdSender);
+	}
+	catch (std::runtime_error& e)
+	{
+		std::cout << e.what() << std::endl;
+		return ;
+	}
+	if (buff.size() < 7)
+		return ERR_NEEDMOREPARAMS(*from, "INVITE");
     std::string data = buff.substr(buff.find("INVITE") + 7);
-    Client *from;
-    try{
-        from = &findClientWithFd(fdSender);
-    }
-    catch (std::runtime_error& e)
-    {
-        std::cout << e.what() << std::endl;
-        return ;
-    }
     std::deque<std::string> datas = split(data, ' ');
     if (datas.size() < 2)
     {

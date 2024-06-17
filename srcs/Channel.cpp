@@ -2,10 +2,10 @@
 
 Channel::Channel() {}
 
-Channel::Channel(std::string name, Client *creator, Bot *bot)
+Channel::Channel(std::string name, Client *creator, Bot bot)
 {
     this->_name = name;
-	this->_bot = bot;
+	this->_bot = &bot;
     this->_clients.push_back(creator);
     this->_operators.push_back(creator);
     this->_modes.insert(std::pair<char, bool>('i', false));
@@ -110,6 +110,17 @@ void    Channel::removeClient(Client &toRemove)
     }
 }
 
+bool	Channel::clientInChannelName(std::string& name)
+{
+	for (size_t i = 0; i < _clients.size(); i++)
+	{
+		if (_clients[i]->getNick() == name)
+			return true;
+	}
+	return false;
+}
+
+
 bool Channel::clientIsInvited(Client &client)
 {
     for (size_t i = 0; i < _clientsInvited.size(); i++)
@@ -123,12 +134,4 @@ bool Channel::clientIsInvited(Client &client)
 std::string Channel::getPass()
 {
     return _password;
-}
-
-void Channel::displayFDS()
-{
-    for (size_t i = 0; i < _operators.size(); i++)
-    {
-        std::cout << RED << _operators[i]->getFdClient() << RESET << std::endl;
-    }
 }

@@ -1,16 +1,36 @@
 #include "../includes/Bot.hpp"
 #include "../includes/Server.hpp"
 #include "../includes/lib.hpp"
-#include <curl/curl.h>
+#include <cstdio>
 #include <sstream>
 #include <algorithm>
 #include <cstdlib>
+#include <memory>
 
 Bot::Bot() {
 	this->_name = "Vlad";
 }
 
 Bot::~Bot() {}
+
+std::string exec(const char* cmd) {
+    char buffer[128];
+    std::string result;
+    FILE* pipe = popen(cmd, "r");
+    if (!pipe) {
+        throw std::runtime_error("popen() failed!");
+    }
+    try {
+        while (fgets(buffer, sizeof(buffer), pipe) != NULL) {
+            result += buffer;
+        }
+    } catch (std::exception& e) {
+        pclose(pipe);
+        throw;
+    }
+    pclose(pipe);
+    return result;
+}
 
 std::string Bot::parseWeatherResponse(const std::string& response) {
     size_t key_pos, start, end;
@@ -36,36 +56,24 @@ std::string Bot::parseWeatherResponse(const std::string& response) {
     std::string temp_str = response.substr(start + 1, end - start - 1);
     double temperature = std::strtod(temp_str.c_str(), NULL) - 273.15; // Convert from Kelvin to Celsius
 
-	std::string toRet = "Weather in " + city + ": " + description + ", Temperature: " + ft_ftoa(temperature) + "°C";
-    return toRet;
-}
+	char *temp = ft_ftoa(temperature);
 
-static size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp) {
-    std::string* str = static_cast<std::string*>(userp);
-    str->append(static_cast<char*>(contents), size * nmemb);
-    return size * nmemb;
+	std::string toRet = "Weather in " + city + ": " + description + ", Temperature: " + temp + "°C";
+	delete [] temp;
+    return toRet;
 }
 
 std::string Bot::getWeather(std::string city) {
     std::string api_key = "f8256d6bf00097afab7928c620d8af85";
-    std::string url = "http://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + api_key;
+    std::string url = "curl -s \"http://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + api_key + "\"";
 
-    CURL* curl;
-    CURLcode res;
     std::string readBuffer;
-
-    curl = curl_easy_init();
-    if(curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-        res = curl_easy_perform(curl);
-        curl_easy_cleanup(curl);
-
-        if (res != CURLE_OK) {
-            return "Error: Unable to get weather data";
-        }
-    }
+	try {
+		readBuffer = exec(url.c_str());
+	}
+	catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
+	}
     return readBuffer;
 }
 

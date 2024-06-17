@@ -1,5 +1,5 @@
 #include "../includes/Server.hpp"
-#include "../includes/Error.hpp"
+#include "../includes/ErrorAndReply.hpp"
 void    Server::attributeNickName(int fd, std::string& buff)
 {
     std::string newNick = buff.substr(buff.find("NICK") + 5);
@@ -12,6 +12,8 @@ void    Server::attributeNickName(int fd, std::string& buff)
         std::cout << e.what() << std::endl;
         return ;
     }
+	if (from->getDefNick())
+		return ERR_ALREADYNICKED(*from);
     if (newNick.empty())
     {
         return ERR_NONICKNAMEGIVEN(*from);
@@ -24,7 +26,11 @@ void    Server::attributeNickName(int fd, std::string& buff)
     {
         return ERR_NICKNAMEINUSE(*from, newNick);
     }
+	std::string oldNick = from->getNick();
     from->setNick(newNick);
+	from->setDefNick();
+	std::string notif = ":" + oldNick + " NICK : " + newNick + "\r\n";
+	servSendMessageToClient(notif, *from);
 }
 
 bool    Server::verifyNick(std::string& nick)
@@ -60,7 +66,6 @@ void    Server::setUsername(int fdSender, std::string& buff)
         std::cout << e.what() << std::endl;
         return ;
     }
-    std::cout << RED << datas.size() << RESET << std::endl;
     if (datas.size() < 4 || datas[0].empty() || datas[3].empty())
     {
         return ERR_NEEDMOREPARAMS(*from, "USER");
