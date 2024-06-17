@@ -144,3 +144,21 @@ void RPL_PRVMSG(Client& clientTo, std::string from, std::string to, std::string 
 	std::string rpl = ":" + from + " PRIVMSG " + to + " :" + message + "\r\n";
 	servSendMessageToClient(rpl, clientTo);
 }
+
+void ERR_ALREADYNICKED(Client& client)
+{
+	std::string err = ":Server NOTICE " + client.getNick() + " :You already have a nickname\r\n";
+	servSendMessageToClient(err, client);
+}
+
+void ERR_NOTENOUGHPLACE(Client& client, std::string &ch)
+{
+	std::string err = ":Server NOTICE " + ch + " " + client.getNick() + " :Can't be less than 2 (+l)\r\n";
+	servSendMessageToClient(err, client);
+}
+
+void ERR_LESSTHANACTIVEUSER(Client& client, std::string &ch)
+{
+	std::string err = ":Server NOTICE " + ch + " " + client.getNick() + " :Can't be less than the number of client in the channel (+l)\r\n";
+	servSendMessageToClient(err, client);
+}

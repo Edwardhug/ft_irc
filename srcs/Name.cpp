@@ -12,6 +12,8 @@ void    Server::attributeNickName(int fd, std::string& buff)
         std::cout << e.what() << std::endl;
         return ;
     }
+	if (from->getDefNick())
+		return ERR_ALREADYNICKED(*from);
     if (newNick.empty())
     {
         return ERR_NONICKNAMEGIVEN(*from);
@@ -24,7 +26,11 @@ void    Server::attributeNickName(int fd, std::string& buff)
     {
         return ERR_NICKNAMEINUSE(*from, newNick);
     }
+	std::string oldNick = from->getNick();
     from->setNick(newNick);
+	from->setDefNick();
+	std::string notif = ":" + oldNick + " NICK : " + newNick + "\r\n";
+	servSendMessageToClient(notif, *from);
 }
 
 bool    Server::verifyNick(std::string& nick)

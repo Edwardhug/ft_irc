@@ -17,6 +17,7 @@ class Client
     bool _corrPass;
 	bool		_inChannel;
 	Channel		*_activeChannel;
+	bool _asDefNick;
 
     public:
     Client();
@@ -40,6 +41,8 @@ class Client
     std::string getRealname() const;
     void setUsername(std::string &usr);
     void setRealname(std::string &rl);
+	bool getDefNick();
+	void setDefNick();
 };
 
 #endif

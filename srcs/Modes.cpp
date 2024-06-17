@@ -6,7 +6,7 @@ std::string getModesActivate(Channel chan)
     std::map<char, bool> modes = chan.getModes();
     unsigned int maxClient = chan.getMaxClient();
     std::map<char, bool>::iterator it;
-    std::string res = ":Serveur NOTICE " + chan.getName() + " Active modes are :+";
+    std::string res = ":Server NOTICE " + chan.getName() + " Active modes are :+";
     for (it = modes.begin(); it != modes.end(); it++)
     {
         if (it->second)
@@ -19,6 +19,9 @@ std::string getModesActivate(Channel chan)
         res += " " + oss.str();
     }
     res += "\r\n";
+
+	if (res.compare(":Server NOTICE " + chan.getName() + " Active modes are :+\r\n") == 0)
+		return ":Server NOTICE " + chan.getName() + " No active modes\r\n";
     return res;
 }
 
@@ -130,6 +133,10 @@ void    Channel::addModes(char mode, Client& from, std::string target)
                 return ERR_NEEDMOREPARAMSCHANNEL(from, _name, "MODE +l");
             }
             _maxClient = ft_atoi(target.c_str());
+			if (_maxClient < 2)
+				return ERR_NOTENOUGHPLACE(from, _name);
+			if (_maxClient < _clients.size())
+				return ERR_LESSTHANACTIVEUSER(from, _name);
         }
         _modes[mode] = true;
         std::string notif = ":" + from.getNick() + " MODE " + _name + " +" + mode;
@@ -186,9 +193,19 @@ void Channel::changeMode(char addOrDel, char mode, Client& from, std::string tar
 void    Server::splitForMode(const std::string &buff, int fdSender)
 {
     std::string target;
+	Client *from;
+	try {
+		from = &findClientWithFd(fdSender);
+	}
+	catch (std::runtime_error& e)
+	{
+		std::cerr << e.what() << std::endl;
+		return;
+	}
+	if (buff.size() < 5)
+		return ERR_NEEDMOREPARAMS(*from, "MODE");
     std::string data = buff.substr(buff.find("MODE") + 5);
-    std::deque<std::string> datas = split(data, ' ');
-    Client *from;
+    std::deque<std::string> datas = splitBuffer(data, ' ');
     std::string toRet;
 
     if (datas.size() == 1) {
@@ -214,14 +231,7 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
         servSendMessageToClient(toRet, *c);
         return ;
     }
-    try {
-        from = &findClientWithFd(fdSender);
-    }
-    catch (std::runtime_error& e)
-    {
-        std::cerr << e.what() << std::endl;
-        return;
-    }
+
     if (datas.size() == 3)
     {
         target = datas[2];
