@@ -88,12 +88,22 @@ void Bot::respondToCommand(std::string city, std::string channel, Client& from) 
 
 void	Server::sendWeatherRequest(std::string &buff, int fdSender) {
 	std::deque<std::string> data = splitBuffer(buff, ' ');
-	Client from = findClientWithFd(fdSender);
+	Client *from;
+    try
+    {
+        from = &findClientWithFd(fdSender);
+    }
+    catch (std::runtime_error& e)
+    {
+        std::cout << RED << e.what() << RESET << std::endl;
+        return ;
+    }
 	if (data.size() != 4){
 		std::string message = ":VladTheRobot!VladTheRobot@server PRIVMSG " +  data[1] + " :Invalid command.\r\n";
-		servSendMessageToClient(message, from);
-		return ;}
+		servSendMessageToClient(message, *from);
+		return ;
+    }
 	Bot bot;
-	bot.respondToCommand(data[3], data[1], from);
+	bot.respondToCommand(data[3], data[1], *from);
 	(void)fdSender;
 }
