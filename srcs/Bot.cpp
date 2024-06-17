@@ -24,7 +24,7 @@ std::string exec(const char* cmd) {
         while (fgets(buffer, sizeof(buffer), pipe) != NULL) {
             result += buffer;
         }
-    } catch (...) {
+    } catch (std::exception& e) {
         pclose(pipe);
         throw;
     }

@@ -135,7 +135,7 @@ void ERR_NOTEXTTOSEND(Client &client)
 
 void ERR_USERNOTINCHANNEL(Client& client, std::string &nick, std::string channel)
 {
-    std::string err = ":server 441 " + client.getNick() + " " + nick + " " + channel + " :They aren't on that channel\r\n";
+    std::string err = ":Server NOTICE " + channel + " " + nick + " :They aren't on that channel\r\n";
     servSendMessageToClient(err, client);
 }
 

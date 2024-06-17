@@ -12,10 +12,19 @@ void    Server::sendMessageToChannel(std::string channelName, std::string messag
     channel.msgToChannel(message);
 }
 
-void	Server::sendConfirmation(std::deque<std::string> data, Client &client) {
+void	Server::sendConfirmationJoin(std::deque<std::string> data, Client &client) {
 	std::string joinMsg = ":" + client.getNick() + " JOIN " + data[1] + "\r\n";
     sendMessageToChannel(data[1], joinMsg);
-    std::string topicMsg = ":server 332 " + client.getNick() + " " + data[1] + " :Welcome to the new channel " + data[1] + "\r\n";
+	Channel *ch;
+	try
+	{
+		ch = &findChannelWithName(data[1]);
+	}
+	catch (std::runtime_error &e)
+	{
+		return ERR_NOSUCHCHANNEL(client, data[1]);
+	}
+    std::string topicMsg = ":server 332 " + client.getNick() + " " + data[1] + " " + ch->getTopic() + "\r\n";
     if (!servSendMessageToClient(topicMsg, client))
         return ;
     std::string nameList = ":server 353 " + client.getNick() + " = " + data[1] + " :";
@@ -39,6 +48,33 @@ void	Server::sendConfirmation(std::deque<std::string> data, Client &client) {
         return ;
 }
 
+
+void	Server::sendConfirmationCreate(std::deque<std::string> data, Client &client) {
+	std::string joinMsg = ":" + client.getNick() + " JOIN " + data[1] + "\r\n";
+	sendMessageToChannel(data[1], joinMsg);
+	std::string topicMsg = ":server 332 " + client.getNick() + " " + data[1] + " Welcome to the channel : " + data[1] + "\r\n";
+	if (!servSendMessageToClient(topicMsg, client))
+		return ;
+	std::string nameList = ":server 353 " + client.getNick() + " = " + data[1] + " :";
+	for (size_t i = 0; i < _vecChannel.size(); ++i) {
+		if (_vecChannel[i].getName() == data[1]) {
+			std::deque<Client*> vecClient = _vecChannel[i].getVecClient();
+			for (size_t j = 0; j < vecClient.size(); ++j) {
+				if (_vecChannel[i].checkOperator(*vecClient[j]) == true)
+					nameList += "@" + vecClient[j]->getNick() + " ";
+				else
+					nameList += vecClient[j]->getNick() + " ";
+			}
+			nameList += "\r\n";
+			if (!servSendMessageToClient(nameList, client))
+				return ;
+			break;
+		}
+	}
+	std::string endOfNamesMsg = ":server 366 " + client.getNick() + " " + data[1] + " :End of /NAMES list\r\n";
+	if (!servSendMessageToClient(endOfNamesMsg, client))
+		return ;
+}
 //=====================JOIN============================
 
 bool	Server::channelExist(std::string name) {
@@ -124,7 +160,7 @@ void	Server::splitForJoin(std::string buff, int fdSender)
 		addChannel(newChannel);
 		client->changeChannelBool(true);
 		client->setChannel(findChannelWithName(data[1]));
-		sendConfirmation(data, *client);
+		sendConfirmationCreate(data, *client);
 	}
 	else if (data.size() >= 2 && channelExist(data[1]) == true) {
         Channel& channel = findChannelWithName(data[1]);
@@ -132,27 +168,21 @@ void	Server::splitForJoin(std::string buff, int fdSender)
             return ;
         if (channel.checkPerm('k'))
         {
-			std::cout << RED << "je passe\n" << RESET;
             if (data.size() < 3)
 			{
-				std::cout << RED << "ici !!\n" << RESET ;
 				return ERR_BADCHANNELKEY(*client, data[1]);
 			}
 			if (data[2].find(' ') != std::string::npos)
 				data[2].erase(data[2].find(' '));
             if (data[2] != channel.getPass())
 			{
-				for (size_t i = 0; i < data[2].size(); i++)
-					std::cout << GREEN << static_cast<int>(data[2][i]) << " ";
-				std::cout << '\n' << RESET;
-				std::cout << RED << data[2] << " " << data[2].size() << " " << channel.getPass() << std::endl << RESET;
 				return ERR_BADCHANNELKEY(*client, data[1]);
 			}
         }
 		addClientToChannel(data[1], *client);
 		client->changeChannelBool(true);
 		client->setChannel(findChannelWithName(data[1]));
-		sendConfirmation(data, *client);
+		sendConfirmationJoin(data, *client);
 	}
 }
 //==============================channel msg=============================

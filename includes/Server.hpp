@@ -55,7 +55,8 @@ public:
 	void    addClientToChannel(std::string nameChannel, Client &client);
 	Channel &findChannelWithName(std::string name);
 	void	channelMsg(char *buffer, int fdSender);
-	void	sendConfirmation(std::deque<std::string> data, Client &client);
+	void	sendConfirmationCreate(std::deque<std::string> data, Client &client);
+	void	sendConfirmationJoin(std::deque<std::string> data, Client &client);
 	void    checkPass(const std::string &buff, int fdClient);
     void errorPassword(Client& client);
     char *getMessage(char *buffer);

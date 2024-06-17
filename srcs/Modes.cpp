@@ -63,7 +63,6 @@ void Channel::addOperator(std::string target, Client& from)
 {
 	if (!clientInChannelName(target))
 	{
-		std::cout << GREEN <<  "cc" << RESET << std::endl;
 		return ERR_USERNOTINCHANNEL(from, target, _name);
 	}
     if (checkOperatorWithName(target))
