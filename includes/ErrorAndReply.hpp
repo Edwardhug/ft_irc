@@ -11,7 +11,6 @@ void ERR_NOTONCHANNEL(Client& client, std::string channel);
 void ERR_CHANOPRIVSNEEDED(Client& client, std::string channel);
 void ERR_USERONCHANNEL(Client& client, std::string nick, std::string channel);
 void ERR_WASNOSUCHNICK(Client& client, std::string nick);
-void sendErrorToClient(const std::string &message, Client &client);
 void ERR_PASSWDISMATCH(Client& client);
 void ERR_CHANNELISFULL(Client& client, std::string channel);
 void ERR_INVITEONLYCHAN(Client& client, std::string channel);

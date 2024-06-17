@@ -73,6 +73,7 @@ bool strIsDigit(std::string &str)
 
 bool servSendMessageToClient(const std::string &message, Client &client)
 {
+	std::cout << RED << message << RESET << std::endl;
     ssize_t bytesSent = send(client.getFdClient(), message.c_str(), message.length(), 0);
     if (bytesSent == -1)
     {

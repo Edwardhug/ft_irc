@@ -52,6 +52,7 @@ class Channel {
     void msgToChannel(std::string msg);
     std::map<char, bool> getModes();
     unsigned int getMaxClient();
+	bool	clientInChannelName(std::string& name);
 };
 
 #endif

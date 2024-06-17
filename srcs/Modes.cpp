@@ -33,9 +33,10 @@ void Channel::deleteOperator(std::string target, Client& from)
             _operators.erase(it);
             std::string notif = ":" + from.getNick() + " MODE " + _name + " -o " + target + "\r\n";
             msgToChannel(notif);
-            break ;
+            return ;
         }
     }
+	return ERR_USERNOTINCHANNEL(from, target, _name);
 }
 
 void    Channel::msgToChannel(std::string msg)
@@ -60,6 +61,11 @@ std::string removeSpaces(std::string str)
 
 void Channel::addOperator(std::string target, Client& from)
 {
+	if (!clientInChannelName(target))
+	{
+		std::cout << GREEN <<  "cc" << RESET << std::endl;
+		return ERR_USERNOTINCHANNEL(from, target, _name);
+	}
     if (checkOperatorWithName(target))
     {
         return ERR_OPEALREADY(from, target, _name);

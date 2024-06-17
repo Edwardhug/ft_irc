@@ -35,16 +35,10 @@ void	Server::splitForTopic(std::string buff, int fdSender) {
 		channel.setTopic(data[2]);
 		std::string rpl = ":server 332 " + client->getNick() + " " + channelName + " :" + channel.getTopic() + "\r\n";
 		sendMessageToChannel(channelName, rpl);
-		//std::string message = ":Server NOTICE " + channelName + " Setting the new topic on \""+ channelName + "\" to \"" + channel.getTopic() + "\".\r\n";
-		//if (!servSendMessageToClient(message, *client))
-           // return ;
 	}
 	else if (data.size() == 2 && channelExist(data[1]) == true) {
 		std::string rpl = ":server 332 " + client->getNick() + " " + channelName + " :" + channel.getTopic() + "\r\n";
 		sendMessageToChannel(channelName, rpl);
-		//std::string message = ":Server NOTICE " + channelName + " Channel topic is \"" + channel.getTopic() + "\".\r\n";
-		//if (!servSendMessageToClient(message, *client))
-          //  return ;
 	}
 	else {
 		return ERR_NOSUCHCHANNEL(*client, data[1]);

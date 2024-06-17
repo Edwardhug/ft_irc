@@ -110,6 +110,17 @@ void    Channel::removeClient(Client &toRemove)
     }
 }
 
+bool	Channel::clientInChannelName(std::string& name)
+{
+	for (size_t i = 0; i < _clients.size(); i++)
+	{
+		if (_clients[i]->getNick() == name)
+			return true;
+	}
+	return false;
+}
+
+
 bool Channel::clientIsInvited(Client &client)
 {
     for (size_t i = 0; i < _clientsInvited.size(); i++)

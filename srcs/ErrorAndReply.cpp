@@ -15,7 +15,7 @@ void ERR_NEEDMOREPARAMS(Client& client, std::string fx)
 void ERR_NEEDMOREPARAMSCHANNEL(Client& client, std::string channel, std::string fx)
 {
     std::string err = ":server 461 " + client.getNick() + " " + channel + " " + fx + " :Not enough parameters\r\n";
-    servSendMessageToClient(err, client);
+	servSendMessageToClient(err, client);
 }
 
 void ERR_NOTONCHANNEL(Client& client, std::string channel)
@@ -75,7 +75,7 @@ void RPL_INVITING(Client& from, Client& to, std::string channel)
 
 void RPL_CHANNELMODEIS(Client& client, std::string channel, std::string modes)
 {
-    std::string reply = ":server 324 " + client.getNick() + " " + channel + " " + modes;
+    std::string reply = ":server 324 " + client.getNick() + " " + channel + " " + modes + "\r\n";
     servSendMessageToClient(reply, client);
 }
 
