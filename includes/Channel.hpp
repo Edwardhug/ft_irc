@@ -26,34 +26,63 @@ class Channel {
 	Bot *_bot;
 
     public:
-	Channel();
-    Channel(std::string name, Client* creator, Bot bot);
+    Channel();
+
+    Channel(std::string name, Client *creator, Bot bot);
+
     ~Channel();
-    void changeMode(char addOrDel, char mode, Client& from, std::string target);
-	void	addClient(Client *newClient);
+
+    void changeMode(char addOrDel, char mode, Client &from, std::string target);
+
+    void addClient(Client *newClient);
+
     std::string getName() const;
-	std::deque<Client*> getVecClient();
-    void deleteOperator(std::string target, Client& from);
-    void addOperator(std::string target, Client& from);
+
+    std::deque<Client *> getVecClient();
+
+    void deleteOperator(std::string target, Client &from);
+
+    void addOperator(std::string target, Client &from);
+
     void setTopic(std::string topic);
+
     std::string getTopic();
+
     bool checkPerm(char mode);
+
     bool checkOperator(Client &client);
-    void addModes(char mode, Client& from, std::string target);
-    void delModes(char mode, Client& from, std::string target);
+
+    void addModes(char mode, Client &from, std::string target);
+
+    void delModes(char mode, Client &from, std::string target);
+
     bool clientInChannel(Client &toFind);
+
     void removeClient(Client &toRemove);
-    void addClientInvited(Client* newClient);
-    bool clientIsInvited(Client& client);
+
+    void addClientInvited(Client *newClient);
+
+    bool clientIsInvited(Client &client);
+
     std::string getPass();
-    bool checkModesForJoin(Client& client);
+
+    bool checkModesForJoin(Client &client);
+
     bool checkOperatorWithName(std::string nick);
+
     void msgToChannel(std::string msg);
+
     std::map<char, bool> getModes();
+
     unsigned int getMaxClient();
-	bool	clientInChannelName(std::string& name);
+
+    bool clientInChannelName(std::string &name);
+
     void removeClientFd(int fd);
-    bool	clientInChannelFd(int fd);
+
+    bool clientInChannelFd(int fd);
+
+    void sendNamesInChannel();
 };
 
 #endif

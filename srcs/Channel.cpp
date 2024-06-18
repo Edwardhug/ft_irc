@@ -124,8 +124,9 @@ bool	Channel::clientInChannelFd(int fd)
 {
     for (size_t i = 0; i < _clients.size(); i++)
     {
-        if (_clients[i]->getFdClient() == fd)
+        if (_clients[i]->getFdClient() == fd) {
             return true;
+        }
     }
     return false;
 }
@@ -145,16 +146,42 @@ std::string Channel::getPass()
     return _password;
 }
 
-
 void Channel::removeClientFd(int fd)
 {
     for (size_t i = 0; i < _clients.size(); i++)
     {
         if (_clients[i]->getFdClient() == fd)
         {
-            std::cout << RED << _clients[i]->getNick() << RESET << std::endl;
             _clients.erase(_clients.begin() + i);
+            break;
+        }
+    }
+    for (size_t i = 0; i < _operators.size(); i++)
+    {
+        if (_operators[i]->getFdClient() == fd)
+        {
+            _operators.erase(_operators.begin() + i);
+            break;
         }
     }
 }
 
+void Channel::sendNamesInChannel()
+{
+    for (size_t i = 0; i < _clients.size(); i++)
+    {
+        std::string nameList = ":server 353 " + _clients[i]->getNick() + " = " + _name + " :";
+        for (size_t j = 0; j < _clients.size(); ++j) {
+            if (checkOperator(*_clients[j]) == true)
+                nameList += "@" + _clients[j]->getNick() + " ";
+            else
+                nameList += _clients[j]->getNick() + " ";
+        }
+        nameList += "\r\n";
+        if (!servSendMessageToClient(nameList, *_clients[i]))
+            return;
+        std::string endOfNamesMsg = ":server 366 " + _clients[i]->getNick() + " " + _name + " :End of /NAMES list\r\n";
+        if (!servSendMessageToClient(endOfNamesMsg, *_clients[i]))
+            return;
+    }
+}

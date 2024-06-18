@@ -40,11 +40,17 @@ void Server::addChannel(const Channel &channel) {
 
 void Server::clearClient(int fd)
 {
+    for (size_t i = 0; i < _vecChannel.size(); i++)
+    {
+        if (_vecChannel[i].clientInChannelFd(fd)) {
+            _vecChannel[i].removeClientFd(fd);
+            _vecChannel[i].sendNamesInChannel();
+        }
+    }
     for (size_t i = 0; i < _vecClient.size(); i++)
     {
         if (_vecClient[i].getFdClient() == fd)
         {
-            std::cout << _vecClient[i].getIpAddr() << std::endl;
             _vecClient.erase(_vecClient.begin() + i);
             break ;
         }
@@ -55,12 +61,6 @@ void Server::clearClient(int fd)
         {
             _vecPollFd.erase(_vecPollFd.begin() + i);
             break ;
-        }
-    }
-    for (size_t i = 0; i < _vecChannel.size(); i++)
-    {
-        if (_vecChannel[i].clientInChannelFd(fd)) {
-            _vecChannel[i].removeClientFd(fd); // Envoyer message pour channel
         }
     }
 }
@@ -176,7 +176,7 @@ void	Server::readReceivedData(int fd)
         completeBuffer += buffer;
         if (completeBuffer.find('\n') != std::string::npos)
         {
-            std::deque<std::string> splittedBuffer = splitBuffer(completeBuffer, '\n');
+            std::deque<std::string> splittedBuffer = splitBuffer(completeBuffer, '\n'); // split sur \r\n ?
             completeBuffer.erase();
             for (size_t i = 0; i < splittedBuffer.size(); i++)
             {
@@ -238,13 +238,13 @@ void	Server::servLoop()
 {
 	while (g_signal == false)
 	{
-		if (poll(&_vecPollFd[0], _vecPollFd.size(), -1) == -1 && g_signal == false) { //va bloquer jusqu'a recevoir une donnee
+		if (poll(&_vecPollFd[0], _vecPollFd.size(), -1) == -1 && g_signal == false) {
 			std::cout << "poll error" << std::endl;
 			throw std::exception();
 		}
 		for (size_t i = 0; i < _vecPollFd.size(); i++) {
-			if (_vecPollFd[i].revents & POLLIN) { // on verifie si le bit de POLLIN est dans revent, comme ca on check si il y a bien des trucs a lire
-				if (_vecPollFd[i].fd == _serverSocketFd) //regarde si on a le meme file descriptor que celui du socket du serveur
+			if (_vecPollFd[i].revents & POLLIN) {
+				if (_vecPollFd[i].fd == _serverSocketFd)
 					addNewClient();
 				else
 					readReceivedData(_vecPollFd[i].fd);
