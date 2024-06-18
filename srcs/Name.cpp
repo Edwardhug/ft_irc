@@ -12,8 +12,9 @@ void    Server::attributeNickName(int fd, std::string& buff)
         std::cout << e.what() << std::endl;
         return ;
     }
-	if (from->getDefNick())
-		return ERR_ALREADYNICKED(*from);
+	if (from->getDefNick()) {
+        return ERR_ALREADYNICKED(*from);
+    }
     if (newNick.empty())
     {
         return ERR_NONICKNAMEGIVEN(*from);
@@ -26,11 +27,14 @@ void    Server::attributeNickName(int fd, std::string& buff)
     {
         return ERR_NICKNAMEINUSE(*from, newNick);
     }
-	std::string oldNick = from->getNick();
+    std::string oldNick = from->getNick();
     from->setNick(newNick);
-	from->setDefNick();
-	std::string notif = ":" + oldNick + " NICK : " + newNick + "\r\n";
-	servSendMessageToClient(notif, *from);
+    from->setDefNick();
+    std::string notif = ":" + oldNick + " NICK : " + newNick + "\r\n";
+	if (!servSendMessageToClient(notif, *from))
+    {
+        return ;
+    }
 }
 
 bool    Server::verifyNick(std::string& nick)
@@ -77,5 +81,6 @@ void    Server::setUsername(int fdSender, std::string& buff)
     if (datas[1] != "0" && datas[2] != "*")
         return;
     from->setUsername(datas[0]);
+    datas[3] = datas[3].substr(1);
     from->setRealname(datas[3]);
 }

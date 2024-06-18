@@ -82,7 +82,9 @@ class Channel {
 
     bool clientInChannelFd(int fd);
 
-    void sendNamesInChannel();
+    bool sendNamesInChannel(Client& client);
+
+    void closeChannel();
 };
 
 #endif

@@ -21,7 +21,7 @@ void	Server::splitForTopic(std::string buff, int fdSender) {
 	std::string channelName = channel.getName();
 	if (data.size() >= 3 && data[2] == ":: " && channelExist(data[1]) == true) {
 		if (channel.checkPerm('t') == true && channel.checkOperator(*client) == false ) {
-			return ERR_CHANOPRIVSNEEDED(*client, channel.getName()); //? pas sur que ce soit le bon code d'erreur
+			return ERR_CHANOPRIVSNEEDED(*client, channel.getName());
 		}
 		channel.setTopic("");
 		std::string message = ":Server NOTICE " + channelName + " Channel topic is now clear." + "\r\n";
@@ -30,7 +30,7 @@ void	Server::splitForTopic(std::string buff, int fdSender) {
 	}
 	else if (data.size() >= 3 && channelExist(data[1]) == true) {
 		if (channel.checkPerm('t') == true && channel.checkOperator(*client) == false ) {
-			return ERR_CHANOPRIVSNEEDED(*client, channel.getName()); //? pas sur que ce soit le bon code d'erreur
+			return ERR_CHANOPRIVSNEEDED(*client, channel.getName());
 		}
 		channel.setTopic(data[2]);
 		std::string rpl = ":server 332 " + client->getNick() + " " + channelName + " :" + channel.getTopic() + "\r\n";

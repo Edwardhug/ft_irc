@@ -98,7 +98,6 @@ void Server::addClientToChannel(std::string nameChannel, Client &client) {
 			return ;
 		}
     }
-
 }
 
 bool isValidName(std::string name) {
@@ -148,6 +147,8 @@ void	Server::splitForJoin(std::string buff, int fdSender)
         std::cout << e.what() << std::endl;
         return ;
     }
+    if (!client->getDefNick())
+        return ERR_NEEDNICK(*client);
     data = split(buff, ' ');
     if (data.size() < 2)
     {

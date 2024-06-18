@@ -22,8 +22,6 @@ class Client
     public:
     Client();
     ~Client();
-    // Client(const Client &c);
-    // Client &operator=(const Client &c);
     void setFdClient(int fd);
     void setIpAddr(const std::string &ipAddr);
     int getFdClient() const;
@@ -43,6 +41,8 @@ class Client
     void setRealname(std::string &rl);
 	bool getDefNick();
 	void setDefNick();
+    bool isNameSet();
+    void setNoChannelActive();
 };
 
 #endif

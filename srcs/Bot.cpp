@@ -35,26 +35,23 @@ std::string exec(const char* cmd) {
 std::string Bot::parseWeatherResponse(const std::string& response) {
     size_t key_pos, start, end;
 
-    // Find city name
     key_pos = response.find("\"name\"");
     start = response.find(":", key_pos);
     end = response.find(",", start);
     std::string city = response.substr(start + 1, end - start - 1);
     city.erase(std::remove(city.begin(), city.end(), '\"'), city.end());
-    
-    // Find weather description
+
     key_pos = response.find("\"description\"");
     start = response.find(":", key_pos);
     end = response.find(",", start);
     std::string description = response.substr(start + 1, end - start - 1);
     description.erase(std::remove(description.begin(), description.end(), '\"'), description.end());
 
-    // Find temperature
     key_pos = response.find("\"temp\"");
     start = response.find(":", key_pos);
     end = response.find(",", start);
     std::string temp_str = response.substr(start + 1, end - start - 1);
-    double temperature = std::strtod(temp_str.c_str(), NULL) - 273.15; // Convert from Kelvin to Celsius
+    double temperature = std::strtod(temp_str.c_str(), NULL) - 273.15;
 
 	char *temp = ft_ftoa(temperature);
 

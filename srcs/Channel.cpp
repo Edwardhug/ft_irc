@@ -166,22 +166,47 @@ void Channel::removeClientFd(int fd)
     }
 }
 
-void Channel::sendNamesInChannel()
+void Channel::closeChannel()
 {
+    std::string partMsg = "PART " + _name + " :Channel closed\r\n";
+    msgToChannel(partMsg);
+    while (_clients.size() > 0)
+    {
+        _clients.erase(_clients.end());
+    }
+}
+
+bool Channel::sendNamesInChannel(Client& client)
+{
+    int nbOpe = 0;
     for (size_t i = 0; i < _clients.size(); i++)
     {
+        if (_clients[i]->getFdClient() == client.getFdClient())
+            continue;
+        std::string msgQuit = ":" + client.getNick() + " PART " + _name + " :He was the last operator.\r\n";
+        if (!servSendMessageToClient(msgQuit, *_clients[i]))
+            return true;
         std::string nameList = ":server 353 " + _clients[i]->getNick() + " = " + _name + " :";
         for (size_t j = 0; j < _clients.size(); ++j) {
-            if (checkOperator(*_clients[j]) == true)
+            if (checkOperator(*_clients[j]) == true) {
                 nameList += "@" + _clients[j]->getNick() + " ";
+                nbOpe++;
+            }
             else
                 nameList += _clients[j]->getNick() + " ";
         }
         nameList += "\r\n";
         if (!servSendMessageToClient(nameList, *_clients[i]))
-            return;
+            return true;
         std::string endOfNamesMsg = ":server 366 " + _clients[i]->getNick() + " " + _name + " :End of /NAMES list\r\n";
         if (!servSendMessageToClient(endOfNamesMsg, *_clients[i]))
-            return;
+            return true;
     }
+    if (nbOpe == 0)
+    {
+        std::string noOpe = ":Server NOTICE " + _name + " :Channel closed (No more operator in the channel)\r\n";
+        msgToChannel(noOpe);
+        return false;
+    }
+    return true;
 }

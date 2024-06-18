@@ -38,13 +38,35 @@ void Server::addChannel(const Channel &channel) {
 	_vecChannel.push_back(channel);
 }
 
+void Server::deleteChannel(const std::string &ch)
+{
+    for (size_t i = 0; i < _vecChannel.size(); i++)
+    {
+        if (_vecChannel[i].getName() == ch)
+            _vecChannel.erase(_vecChannel.begin() + i);
+    }
+}
+
 void Server::clearClient(int fd)
 {
     for (size_t i = 0; i < _vecChannel.size(); i++)
     {
         if (_vecChannel[i].clientInChannelFd(fd)) {
+            Client* c;
+            try {
+                c = &findClientWithFd(fd);
+            }
+            catch (std::runtime_error& e)
+            {
+                std::cout << e.what() << std::endl;
+            }
             _vecChannel[i].removeClientFd(fd);
-            _vecChannel[i].sendNamesInChannel();
+            c->setNoChannelActive();
+            if (!_vecChannel[i].sendNamesInChannel(*c))
+            {
+                _vecChannel[i].closeChannel();
+                deleteChannel(_vecChannel[i].getName());
+            }
         }
     }
     for (size_t i = 0; i < _vecClient.size(); i++)
@@ -86,7 +108,7 @@ void Server::servInit() {
     sockaddr_in data_sock;
     pollfd newPoll;
 
-    data_sock.sin_family = AF_INET; // IPV4
+    data_sock.sin_family = AF_INET;
     data_sock.sin_port = htons(this->_port);
     data_sock.sin_addr.s_addr = INADDR_ANY;
 
@@ -176,7 +198,7 @@ void	Server::readReceivedData(int fd)
         completeBuffer += buffer;
         if (completeBuffer.find('\n') != std::string::npos)
         {
-            std::deque<std::string> splittedBuffer = splitBuffer(completeBuffer, '\n'); // split sur \r\n ?
+            std::deque<std::string> splittedBuffer = splitBuffer(completeBuffer, '\n');
             completeBuffer.erase();
             for (size_t i = 0; i < splittedBuffer.size(); i++)
             {
@@ -189,32 +211,26 @@ void	Server::readReceivedData(int fd)
 	}
 }
 
-void    Server::operatorCanals(const char *buffer, int fdSender)
-{
+void    Server::operatorCanals(const char *buffer, int fdSender) {
     std::string buff = static_cast<std::string>(buffer);
 
-    if (buff.find("PASS") != std::string::npos)
-    {
+    if (buff.find("PASS") != std::string::npos) {
         checkPass(buff, fdSender);
-    }
-    Client *from;
-    try
-    {
-        from = &findClientWithFd(fdSender);
-    }
-    catch (std::runtime_error& e)
-    {
-        std::cout << e.what() << std::endl;
         return ;
     }
+    Client *from;
+    try {
+        from = &findClientWithFd(fdSender);
+    }
+    catch (std::runtime_error &e) {
+        std::cout << e.what() << std::endl;
+        return;
+    }
     if (from->getPass()) {
-		if (buff.find("VLAD") != std::string::npos && buff.find("PRIVMSG") != std::string::npos && buff.size() > 8 && buff[8] == '#') {
-			sendWeatherRequest(buff, fdSender);
-		}
-        else if (buff.find("PRIVMSG") != std::string::npos && buff.size() > 8 && buff[8] == '#') {
+        if (buff.find("VLAD") != std::string::npos && buff.find("PRIVMSG") != std::string::npos && buff.size() > 8 && buff[8] == '#') {
+            sendWeatherRequest(buff, fdSender);
+        } else if (buff.find("PRIVMSG") != std::string::npos && buff.size() > 8 && buff[8] == '#') {
             channelMsg(const_cast<char *>(buffer), fdSender);
-        } else if (buff.find("NICK") != std::string::npos) {
-            attributeNickName(fdSender, buff);
         } else if (buff.find("PRIVMSG") != std::string::npos) {
             splitForPrivMsg(buff, fdSender);
         } else if (buff.find("MODE") != std::string::npos) {
@@ -229,8 +245,9 @@ void    Server::operatorCanals(const char *buffer, int fdSender)
             kickClient(buff, fdSender);
         } else if (buff.find("USER") != std::string::npos) {
             setUsername(fdSender, buff);
+        } else if (buff.find("NICK") != std::string::npos) {
+            attributeNickName(fdSender, buff);
         }
-
     }
 }
 

@@ -2,6 +2,7 @@
 
 Client::Client() : _fdClient(-1), _corrPass(false)
 {
+    _nick = "";
 	_inChannel = false;
     _username = "";
     _realname = "";
@@ -99,4 +100,17 @@ void Client::setUsername(std::string& usr) {
 
 void Client::setRealname(std::string &rl) {
     _realname = rl;
+}
+
+bool    Client::isNameSet()
+{
+    if (_nick.empty())
+        return false;
+    return true;
+}
+
+void Client::setNoChannelActive()
+{
+    _activeChannel = NULL;
+    _inChannel = false;
 }

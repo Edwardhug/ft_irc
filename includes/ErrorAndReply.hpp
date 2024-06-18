@@ -31,4 +31,6 @@ void RPL_PRVMSG(Client& clientTo, std::string from, std::string to, std::string 
 void ERR_ALREADYNICKED(Client& client);
 void ERR_NOTENOUGHPLACE(Client& client, std::string &ch);
 void ERR_LESSTHANACTIVEUSER(Client& client, std::string &ch);
+void ERR_NEEDPASS(Client& client);
+void ERR_NEEDNICK(Client& client);
 #endif

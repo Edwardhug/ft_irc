@@ -32,7 +32,7 @@ void ERR_CHANOPRIVSNEEDED(Client& client, std::string channel)
 
 void ERR_USERONCHANNEL(Client& client, std::string nick, std::string channel)
 {
-    std::string err = ":server 443 " + client.getNick() + " " + nick + " " + channel + " :Is already on channel\r\n";
+    std::string err = ":server 443 " + client.getNick() + " " + nick + " " + channel + " :is already on channel\r\n";
     servSendMessageToClient(err, client);
 }
 
@@ -161,4 +161,10 @@ void ERR_LESSTHANACTIVEUSER(Client& client, std::string &ch)
 {
 	std::string err = ":Server NOTICE " + ch + " " + client.getNick() + " :Can't be less than the number of client in the channel (+l)\r\n";
 	servSendMessageToClient(err, client);
+}
+
+void ERR_NEEDNICK(Client& client)
+{
+    std::string err = "Please use NICK to choose a nickname (petit malin)\r\n";
+    servSendMessageToClient(err, client);
 }
