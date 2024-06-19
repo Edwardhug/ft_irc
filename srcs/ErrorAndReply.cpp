@@ -32,7 +32,7 @@ void ERR_CHANOPRIVSNEEDED(Client& client, std::string channel)
 
 void ERR_USERONCHANNEL(Client& client, std::string nick, std::string channel)
 {
-    std::string err = ":server 443 " + client.getNick() + " " + nick + " " + channel + " :is already on channel\r\n";
+    std::string err = ":server 443 " + client.getNick() + " " + channel + " " + nick + " :is already on channel\r\n";
     servSendMessageToClient(err, client);
 }
 

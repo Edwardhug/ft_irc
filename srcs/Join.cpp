@@ -217,10 +217,17 @@ void Server::channelMsg(char *buffer, int fdSender) {
     }
     char *message = getMessage(buffer);
     std::string channelName = findChannelName(buffer);
-    Channel channel = findChannelWithName(channelName);
+    Channel* channel;
+	try {
+		channel = &findChannelWithName(channelName);
+	}
+	catch (std::runtime_error& e)
+	{
+		return ERR_NOSUCHCHANNEL(*senderClient, channelName);
+	}
     std::string fullMessage = ":" + senderClient->getNick() + "!" + senderClient->getNick() + "@server PRIVMSG " + channelName + " :" + message + "\r\n";
-    std::deque<Client*> vecClient = channel.getVecClient();
-    if (channel.clientInChannel(*senderClient) == false) {
+    std::deque<Client*> vecClient = channel->getVecClient();
+    if (channel->clientInChannel(*senderClient) == false) {
         return ERR_NOTONCHANNEL(*senderClient, channelName);
     }
     for (size_t i = 0; i < vecClient.size(); ++i) {

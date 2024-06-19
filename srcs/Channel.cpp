@@ -168,8 +168,6 @@ void Channel::removeClientFd(int fd)
 
 void Channel::closeChannel()
 {
-    std::string partMsg = "PART " + _name + " :Channel closed\r\n";
-    msgToChannel(partMsg);
     while (_clients.size() > 0)
     {
         _clients.erase(_clients.end());

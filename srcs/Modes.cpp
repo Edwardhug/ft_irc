@@ -215,8 +215,7 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
         }
         catch (std::runtime_error& e)
         {
-            std::cerr << e.what() << std::endl;
-            return;
+            return ERR_NOSUCHCHANNEL(*from, datas[0]);;
         }
         toRet = getModesActivate(chan);
         Client* c;
@@ -237,6 +236,11 @@ void    Server::splitForMode(const std::string &buff, int fdSender)
         target = datas[2];
     }
     std::string channel = datas[0];
+	if (channel.find('#') == std::string::npos)
+	{
+		std::cout << "cc\n";
+		return ERR_NEEDMOREPARAMS(*from, "MODE");
+	}
     std::string what = datas[1];
     if (!from->getPass())
         errorPassword(*from);
