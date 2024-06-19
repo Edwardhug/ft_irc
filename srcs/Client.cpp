@@ -26,11 +26,6 @@ int Client::getFdClient() const
     return (this->_fdClient);
 }
 
-std::string Client::getIpAddr() const
-{
-    return (this->_ipAddrClient);
-}
-
 void Client::setNick(std::string nick)
 {
     this->_nick = nick;
@@ -61,10 +56,6 @@ void Client::setDefNick()
 	this->_asDefNick = true;
 }
 
-bool	Client::getInChannel() {
-	return (_inChannel);
-}
-
 void	Client::changeChannelBool(bool value) {
 	if (value == true)
 		_inChannel = true;
@@ -74,10 +65,6 @@ void	Client::changeChannelBool(bool value) {
 
 void	Client::setChannel(Channel &channel) {
 	_activeChannel = &channel;
-}
-
-Channel Client::getActiveChannel() {
-	return *_activeChannel;
 }
 
 bool    Client::operator==(const Client &other) const
@@ -100,13 +87,6 @@ void Client::setUsername(std::string& usr) {
 
 void Client::setRealname(std::string &rl) {
     _realname = rl;
-}
-
-bool    Client::isNameSet()
-{
-    if (_nick.empty())
-        return false;
-    return true;
 }
 
 void Client::setNoChannelActive()

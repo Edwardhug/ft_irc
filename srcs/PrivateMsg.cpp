@@ -1,7 +1,6 @@
 #include "../includes/lib.hpp"
 #include "../includes/ErrorAndReply.hpp"
 
-//===================PRIVMSG========================
 void    Server::sendmsg(const std::string &from, const std::string &to, const std::string& message)
 {
     Client* clientTo;

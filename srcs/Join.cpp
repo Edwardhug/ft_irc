@@ -75,7 +75,6 @@ void	Server::sendConfirmationCreate(std::deque<std::string> data, Client &client
 	if (!servSendMessageToClient(endOfNamesMsg, client))
 		return ;
 }
-//=====================JOIN============================
 
 bool	Server::channelExist(std::string name) {
 	size_t i;
@@ -186,7 +185,6 @@ void	Server::splitForJoin(std::string buff, int fdSender)
 		sendConfirmationJoin(data, *client);
 	}
 }
-//==============================channel msg=============================
 
 char *Server::getMessage(char *buffer) {
 	char *message = strchr(buffer, ':');

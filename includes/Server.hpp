@@ -28,10 +28,6 @@ public:
 
     ~Server();
 
-    void setPort(int port);
-
-    void setServerSocketFd(int fd);
-
     void addClient(const Client &client);
 
     void addPollFd(const pollfd &fd);
